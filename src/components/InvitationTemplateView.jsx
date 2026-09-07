@@ -485,6 +485,7 @@ export function InvitationTemplateView({
   const [viewMode, setViewMode] = useState('mobile'); // 'mobile' or 'full'
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [mobileSheetMode, setMobileSheetMode] = useState('half'); // 'half', 'peek', 'full'
   const [isUpdating, setIsUpdating] = useState(false);
   const [showUpdateToast, setShowUpdateToast] = useState(false);
   const iframeRef = useRef(null);
@@ -672,8 +673,8 @@ export function InvitationTemplateView({
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
           </button>
 
-          {/* Viewport Switcher */}
-          <div className="flex items-center bg-white/10 rounded-full p-0.5 text-xs">
+          {/* Viewport Switcher - hidden on real mobile phones to avoid header clutter */}
+          <div className="hidden sm:flex items-center bg-white/10 rounded-full p-0.5 text-xs">
             <button
               onClick={() => setViewMode('mobile')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
@@ -711,7 +712,7 @@ export function InvitationTemplateView({
           {/* Direct Order Button */}
           <button
             onClick={() => onOrder(info.id, customData)}
-            className="flex items-center gap-1.5 px-3.5 sm:px-5 py-1.5 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-105"
+            className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-105"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
             <span>Order ({info.price})</span>
@@ -720,8 +721,14 @@ export function InvitationTemplateView({
       </header>
 
       {/* Main Container Area */}
-      <div className={`flex-1 relative flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-2 sm:p-6 overflow-hidden transition-all duration-300 ${
-        isCustomizerOpen ? 'lg:pr-[450px]' : ''
+      <div className={`flex-1 relative flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-1 sm:p-6 overflow-hidden transition-all duration-300 ${
+        isCustomizerOpen
+          ? mobileSheetMode === 'half'
+            ? 'pb-[50vh] md:pb-0 lg:pr-[450px]'
+            : mobileSheetMode === 'peek'
+            ? 'pb-[58px] md:pb-0 lg:pr-[450px]'
+            : 'pb-[88vh] md:pb-0 lg:pr-[450px]'
+          : ''
       }`}>
         
         {/* Loading Indicator */}
@@ -737,16 +744,18 @@ export function InvitationTemplateView({
         )}
 
         {viewMode === 'mobile' ? (
-          /* Realistic Smartphone Bezel Container */
-          <div className="relative w-full max-w-[420px] h-[94vh] max-h-[860px] bg-black rounded-[48px] p-3 shadow-2xl border-[4px] border-slate-700/80 flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          /* Smartphone Bezel Container (adaptive on real phones) */
+          <div className={`relative w-full max-w-[420px] transition-all duration-300 ${
+            isCustomizerOpen ? 'h-full max-h-full sm:max-h-[860px]' : 'h-[94vh] max-h-[860px]'
+          } bg-black rounded-none sm:rounded-[48px] p-0 sm:p-3 shadow-2xl border-0 sm:border-[4px] border-slate-700/80 flex flex-col animate-in fade-in zoom-in-95 duration-200`}>
             
-            {/* Dynamic Island / Speaker Pill */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-30 flex items-center justify-center">
+            {/* Dynamic Island / Speaker Pill - hidden on small mobile to maximize viewable area */}
+            <div className="hidden sm:flex absolute top-4 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-30 items-center justify-center">
               <div className="w-3 h-3 rounded-full bg-slate-900 border border-slate-800 ml-auto mr-2" />
             </div>
 
             {/* Iframe Viewport inside phone */}
-            <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-white">
+            <div className="relative w-full h-full rounded-none sm:rounded-[38px] overflow-hidden bg-white">
               <iframe
                 ref={iframeRef}
                 src={info.url}
@@ -757,11 +766,11 @@ export function InvitationTemplateView({
             </div>
 
             {/* Bottom Home Indicator Bar */}
-            <div className="w-32 h-1 bg-slate-600 rounded-full mx-auto mt-2 shrink-0 opacity-60" />
+            <div className="hidden sm:block w-32 h-1 bg-slate-600 rounded-full mx-auto mt-2 shrink-0 opacity-60" />
           </div>
         ) : (
           /* Full Page Viewport */
-          <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white animate-in fade-in duration-200">
+          <div className="w-full h-full rounded-none sm:rounded-2xl overflow-hidden shadow-2xl bg-white animate-in fade-in duration-200">
             <iframe
               ref={iframeRef}
               src={info.url}
@@ -774,7 +783,7 @@ export function InvitationTemplateView({
 
       </div>
 
-      {/* Slide-Over Template Customizer Drawer */}
+      {/* Slide-Over / Bottom-Sheet Template Customizer Drawer */}
       <TemplateCustomizerDrawer
         isOpen={isCustomizerOpen}
         onClose={() => setIsCustomizerOpen(false)}
@@ -784,6 +793,8 @@ export function InvitationTemplateView({
         onResetCustomData={handleResetCustomData}
         onUpdateView={handleForceUpdateView}
         isUpdating={isUpdating}
+        mobileSheetMode={mobileSheetMode}
+        onMobileSheetModeChange={setMobileSheetMode}
         onSaveAndOrder={(data) => {
           setIsCustomizerOpen(false);
           onOrder(info.id, data);

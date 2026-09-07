@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { 
   X, Heart, Calendar, MapPin, Camera, Clock, 
   Sparkles, RotateCcw, Check, ShoppingBag, Upload, 
-  Trash2, Plus, Info, ChevronRight, RefreshCw 
+  Trash2, Plus, Info, ChevronRight, RefreshCw,
+  ChevronDown, ChevronUp, Eye, Maximize2, Minimize2 
 } from 'lucide-react';
 
 const PHOTO_PRESETS = [
@@ -33,9 +34,14 @@ export function TemplateCustomizerDrawer({
   onResetCustomData,
   onUpdateView,
   isUpdating = false,
+  mobileSheetMode = 'half',
+  onMobileSheetModeChange,
   onSaveAndOrder 
 }) {
   const [activeTab, setActiveTab] = useState('names'); // 'names', 'date', 'venue', 'photo', 'schedule', 'details'
+  const [localSheetMode, setLocalSheetMode] = useState('half');
+  const sheetMode = onMobileSheetModeChange ? mobileSheetMode : localSheetMode;
+  const setSheetMode = onMobileSheetModeChange || setLocalSheetMode;
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
@@ -64,87 +70,167 @@ export function TemplateCustomizerDrawer({
   ];
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl border-l border-slate-200 flex flex-col animate-in slide-in-from-right duration-300">
+    <aside className={`fixed z-50 bg-white shadow-2xl border-slate-200 flex flex-col transition-all duration-300 ease-out
+      /* Desktop styling: right-hand sidebar */
+      md:inset-y-0 md:right-0 md:left-auto md:w-full md:max-w-md md:h-full md:rounded-none md:border-l md:border-t-0
+      /* Mobile styling: Smart Bottom Sheet that preserves card view */
+      ${
+        sheetMode === 'half'
+          ? 'bottom-0 inset-x-0 h-[50vh] max-h-[50vh] rounded-t-3xl border-t shadow-[0_-12px_30px_rgba(0,0,0,0.35)]'
+          : sheetMode === 'peek'
+          ? 'bottom-0 inset-x-0 h-[56px] max-h-[56px] rounded-t-2xl border-t shadow-[0_-8px_20px_rgba(0,0,0,0.25)] overflow-hidden'
+          : 'bottom-0 inset-x-0 h-[88vh] max-h-[88vh] rounded-t-3xl border-t shadow-[0_-12px_30px_rgba(0,0,0,0.35)]'
+      }
+    `}>
       
-      {/* Drawer Header */}
-      <div className="p-4 bg-[#08004b] text-white flex items-center justify-between border-b border-slate-800 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-[#cebb78]/20 flex items-center justify-center text-[#cebb78]">
-            <Sparkles className="w-4 h-4" />
+      {/* Mobile Collapsed Peek Bar (Allows 100% full view of the card on phone) */}
+      {sheetMode === 'peek' ? (
+        <div 
+          onClick={() => setSheetMode('half')}
+          className="h-[56px] px-4 bg-[#08004b] text-white flex items-center justify-between cursor-pointer md:hidden hover:bg-[#0c006b] transition-all shrink-0"
+        >
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="text-xs font-serif font-bold text-[#cebb78] truncate">
+              {customData.partner1 || 'Partner 1'} &amp; {customData.partner2 || 'Partner 2'}
+            </span>
+            <span className="text-[10px] text-slate-300 hidden xs:inline">• Tap to edit</span>
           </div>
-          <div>
-            <h3 className="font-serif text-base font-bold tracking-wide">
-              Personalize Invitation
-            </h3>
-            <p className="text-[11px] text-slate-300">
-              Live instant preview on {templateInfo?.name || 'Template'}
-            </p>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-white/15 px-2.5 py-1 rounded-full">
+              <Sparkles className="w-3 h-3" />
+              <span>Edit Card</span>
+              <ChevronUp className="w-3.5 h-3.5" />
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300"
+              title="Close"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          {onUpdateView && (
+      ) : (
+        <>
+          {/* Mobile Top Actions Bar (Visible only on mobile phones) */}
+          <div className="md:hidden flex items-center justify-between px-3.5 py-1.5 bg-[#08004b] text-white border-b border-slate-800 shrink-0">
             <button
-              onClick={onUpdateView}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#cebb78]/20 hover:bg-[#cebb78]/30 text-[#cebb78] border border-[#cebb78]/40 text-xs font-bold transition-all shadow-xs"
-              title="Force update view preview"
+              onClick={() => setSheetMode('peek')}
+              className="flex items-center gap-1 text-xs font-bold text-amber-300 bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-full transition-all"
+              title="Minimize editor to see full card"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-              <span>Update View</span>
+              <Eye className="w-3.5 h-3.5" />
+              <span>View Full Card</span>
             </button>
-          )}
 
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white flex items-center justify-center transition-all"
-            title="Close Drawer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+            {/* Drag Handle indicator */}
+            <div 
+              onClick={() => setSheetMode(sheetMode === 'half' ? 'full' : 'half')}
+              className="w-12 h-1.5 bg-white/40 hover:bg-white/70 rounded-full cursor-pointer transition-all"
+              title="Click to toggle size"
+            />
 
-      {/* Real-time live status notification banner */}
-      <div className="bg-emerald-50/90 border-b border-emerald-200/80 px-4 py-2 flex items-center justify-between text-[11px] text-emerald-800 shrink-0">
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          Changes update on the spot as you type
-        </span>
-        {onUpdateView && (
-          <button
-            onClick={onUpdateView}
-            className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1"
-          >
-            <RefreshCw className={`w-3 h-3 ${isUpdating ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        )}
-      </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setSheetMode(sheetMode === 'full' ? 'half' : 'full')}
+                className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 transition-all"
+                title={sheetMode === 'full' ? "Split View (Half Screen)" : "Expand Editor"}
+              >
+                {sheetMode === 'full' ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={onClose}
+                className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 transition-all"
+                title="Close"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-1 bg-slate-100 p-1.5 border-b border-slate-200 overflow-x-auto shrink-0 scrollbar-none">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-white text-[#08004b] shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#006989]' : 'text-slate-400'}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+          {/* Main Header */}
+          <div className="p-3 sm:p-4 bg-[#08004b] text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#cebb78]/20 flex items-center justify-center text-[#cebb78] shrink-0">
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-serif text-xs sm:text-base font-bold tracking-wide truncate">
+                  Personalize Invitation
+                </h3>
+                <p className="text-[10px] sm:text-[11px] text-slate-300 truncate">
+                  Live instant preview on {templateInfo?.name || 'Template'}
+                </p>
+              </div>
+            </div>
 
-      {/* Scrollable Form Body */}
-      <div className="flex-1 p-5 overflow-y-auto space-y-6 text-slate-800 text-xs font-sans">
+            <div className="flex items-center gap-2 shrink-0">
+              {onUpdateView && (
+                <button
+                  onClick={onUpdateView}
+                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#cebb78]/20 hover:bg-[#cebb78]/30 text-[#cebb78] border border-[#cebb78]/40 text-xs font-bold transition-all shadow-xs"
+                  title="Force update view preview"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+                  <span className="hidden xs:inline">Update View</span>
+                </button>
+              )}
+
+              <button
+                onClick={onClose}
+                className="hidden md:flex w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white items-center justify-center transition-all"
+                title="Close Drawer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Real-time live status notification banner */}
+          <div className="bg-emerald-50/90 border-b border-emerald-200/80 px-3 py-1.5 sm:px-4 sm:py-2 flex items-center justify-between text-[11px] text-emerald-800 shrink-0">
+            <span className="flex items-center gap-1.5 font-medium truncate">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              Changes update on the spot as you type
+            </span>
+            {onUpdateView && (
+              <button
+                onClick={onUpdateView}
+                className="font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1 shrink-0 ml-2"
+              >
+                <RefreshCw className={`w-3 h-3 ${isUpdating ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            )}
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1.5 border-b border-slate-200 overflow-x-auto shrink-0 scrollbar-none">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                    isActive 
+                      ? 'bg-white text-[#006989] shadow-xs border border-slate-200' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 sm:space-y-5 text-slate-800 text-xs font-sans">
         
         {/* TAB 1: NAMES & COUPLE */}
         {activeTab === 'names' && (
@@ -536,11 +622,11 @@ export function TemplateCustomizerDrawer({
       </div>
 
       {/* Drawer Action Footer */}
-      <div className="p-4 bg-slate-50 border-t border-slate-200 shrink-0 space-y-2.5">
+      <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 shrink-0 space-y-2 sm:space-y-2.5">
         {onUpdateView && (
           <button
             onClick={onUpdateView}
-            className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-300/80 hover:border-slate-400 shadow-xs"
+            className="w-full py-2 sm:py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-300/80 hover:border-slate-400 shadow-xs"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isUpdating ? 'animate-spin' : ''}`} />
             <span>⚡ Update View Preview</span>
@@ -549,7 +635,7 @@ export function TemplateCustomizerDrawer({
 
         <button
           onClick={() => onSaveAndOrder(customData)}
-          className="w-full py-3.5 px-5 rounded-full bg-[#006989] hover:bg-[#005570] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          className="w-full py-3 sm:py-3.5 px-4 sm:px-5 rounded-full bg-[#006989] hover:bg-[#005570] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
         >
           <ShoppingBag className="w-4 h-4" />
           <span>Save &amp; Continue to Order ({templateInfo?.price || '€75'})</span>
@@ -566,10 +652,12 @@ export function TemplateCustomizerDrawer({
 
           <span className="text-emerald-700 font-semibold flex items-center gap-1">
             <Check className="w-3.5 h-3.5" />
-            Live Preview Synchronized
+            Live Synchronized
           </span>
         </div>
       </div>
+      </>
+      )}
 
     </aside>
   );
