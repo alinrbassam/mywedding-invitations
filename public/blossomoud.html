@@ -94,6 +94,10 @@ waitForButton('.popup-enter', function(enterButton) {
     }).catch(err => console.log('Audio play failed:', err));
     audioControl.style.visibility = 'visible';
     audioControl.style.opacity = '1';
+    setTimeout(function() {
+      var env = document.getElementById('rec2443433693');
+      if (env) env.style.display = 'none';
+    }, 2600);
   });
   audioControl.addEventListener('click', function() {
     if (audio.paused) {

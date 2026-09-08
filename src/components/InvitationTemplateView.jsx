@@ -90,6 +90,17 @@ const DEFAULT_TEMPLATE_DATA = {
     dressCode: 'Formal Evening / Traditional Elegant Attire.',
     giftPreference: 'No boxed gifts kindly requested.',
     rsvpDeadline: 'March 1, 2027',
+    language: 'fr',
+    envelopeText: 'Appuyez pour ouvrir',
+    coverSubtitle: 'à partir de 16h',
+    invitationText: 'الآنسة أميرة والسيد يوسف\n\nيسعدهما ويشرفهما أن يدعوا حضرتكم الكريمة\nلمشاركتهما فرحة حفل زفافهما\n\nوذلك بمشيئة الله تعالى يوم السبت 20 ماي 2027\nعلى الساعة الرابعة مساءً\n\nبقاعة',
+    countdownTitle: 'La Célébration Commence',
+    timelineTitle: "Chronologie de l'événement",
+    locationTitle: 'Lieu',
+    mapTitle: 'Itinéraire Google Maps',
+    rsvpTitle: 'Confirmez Votre Présence',
+    rsvpButtonText: 'SOUMETTRE',
+    closingText: 'Au plaisir de vous accueillir',
     schedule: [
       { time: '4:00 PM', title: 'Welcome Reception', note: 'Mint tea & patisserie', icon: '☕' },
       { time: '5:00 PM', title: 'Nikah Ceremony', note: 'Solemnization', icon: '💍' },
@@ -113,7 +124,18 @@ const DEFAULT_TEMPLATE_DATA = {
     welcomeMessage: 'Together with our families, we request the honour of your presence to celebrate our wedding.',
     dressCode: 'Formal Evening / Traditional Elegant Attire.',
     giftPreference: 'No boxed gifts kindly requested.',
-    rsvpDeadline: 'March 1, 2027'
+    rsvpDeadline: 'March 1, 2027',
+    language: 'fr',
+    envelopeText: 'Appuyez pour ouvrir',
+    coverSubtitle: 'à partir de 16h',
+    invitationText: 'الآنسة أميرة والسيد يوسف\n\nيسعدهما ويشرفهما أن يدعوا حضرتكم الكريمة\nلمشاركتهما فرحة حفل زفافهما\n\nوذلك بمشيئة الله تعالى يوم السبت 20 ماي 2027\nعلى الساعة الرابعة مساءً\n\nبقاعة',
+    countdownTitle: 'La Célébration Commence',
+    timelineTitle: "Chronologie de l'événement",
+    locationTitle: 'Lieu',
+    mapTitle: 'Itinéraire Google Maps',
+    rsvpTitle: 'Confirmez Votre Présence',
+    rsvpButtonText: 'SOUMETTRE',
+    closingText: 'Au plaisir de vous accueillir'
   },
   'dolce-vita': {
     partner1: 'Alexa',
@@ -440,6 +462,7 @@ export function InvitationTemplateView({
   const [viewMode, setViewMode] = useState('mobile'); // 'mobile' or 'full'
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [customizerTab, setCustomizerTab] = useState('names');
   const [mobileSheetMode, setMobileSheetMode] = useState('half'); // 'half', 'peek', 'full'
   const [isUpdating, setIsUpdating] = useState(false);
   const [showUpdateToast, setShowUpdateToast] = useState(false);
@@ -556,6 +579,21 @@ export function InvitationTemplateView({
         broadcastCustomization(customData);
       } else if (e.data.type === 'WBG_FIELD_CLICKED') {
         setIsCustomizerOpen(true);
+        if (e.data.field) {
+          setCustomizerTab(e.data.field);
+        }
+      } else if (e.data.type === 'WBG_INLINE_EDIT') {
+        if (e.data.text !== undefined) {
+          if (e.data.field === 'wording') {
+            setCustomData(prev => ({ ...prev, invitationText: e.data.text }));
+          } else if (e.data.field === 'names') {
+            // If couple name was edited
+            const parts = e.data.text.split(/&|\band\b|\n/).map(s => s.trim()).filter(Boolean);
+            if (parts.length >= 2) {
+              setCustomData(prev => ({ ...prev, partner1: parts[0], partner2: parts[1] }));
+            }
+          }
+        }
       }
     };
 
@@ -733,6 +771,8 @@ export function InvitationTemplateView({
                 <TemplateCustomizerDrawer
                   isOpen={true}
                   isInlineDesktop={true}
+                  activeTab={customizerTab}
+                  onTabChange={setCustomizerTab}
                   onClose={() => setIsCustomizerOpen(false)}
                   templateInfo={info}
                   customData={customData}
@@ -767,6 +807,8 @@ export function InvitationTemplateView({
       <div className="md:hidden">
         <TemplateCustomizerDrawer
           isOpen={isCustomizerOpen}
+          activeTab={customizerTab}
+          onTabChange={setCustomizerTab}
           onClose={() => setIsCustomizerOpen(false)}
           templateInfo={info}
           customData={customData}
@@ -789,6 +831,8 @@ export function InvitationTemplateView({
           <TemplateCustomizerDrawer
             isOpen={true}
             isDockedSidebar={true}
+            activeTab={customizerTab}
+            onTabChange={setCustomizerTab}
             onClose={() => setIsCustomizerOpen(false)}
             templateInfo={info}
             customData={customData}

@@ -3,7 +3,8 @@ import {
   X, Heart, Calendar, MapPin, Camera, Clock, 
   Sparkles, RotateCcw, Check, ShoppingBag, Upload, 
   Trash2, Plus, Info, ChevronRight, RefreshCw,
-  ChevronDown, ChevronUp, Eye, Maximize2, Minimize2 
+  ChevronDown, ChevronUp, Eye, Maximize2, Minimize2,
+  Languages, ExternalLink 
 } from 'lucide-react';
 
 const PHOTO_PRESETS = [
@@ -38,9 +39,13 @@ export function TemplateCustomizerDrawer({
   onMobileSheetModeChange,
   isInlineDesktop = false,
   isDockedSidebar = false,
-  onSaveAndOrder 
+  onSaveAndOrder,
+  activeTab: externalActiveTab,
+  onTabChange 
 }) {
-  const [activeTab, setActiveTab] = useState('names'); // 'names', 'date', 'venue', 'photo', 'schedule', 'details'
+  const [internalTab, setInternalTab] = useState('names');
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalTab;
+  const setActiveTab = onTabChange || setInternalTab;
   const [localSheetMode, setLocalSheetMode] = useState('half');
   const sheetMode = onMobileSheetModeChange ? mobileSheetMode : localSheetMode;
   const setSheetMode = onMobileSheetModeChange || setLocalSheetMode;
@@ -66,6 +71,7 @@ export function TemplateCustomizerDrawer({
     { id: 'names', label: 'Names', icon: Heart },
     { id: 'date', label: 'Date & Time', icon: Calendar },
     { id: 'venue', label: 'Location', icon: MapPin },
+    { id: 'wording', label: 'Wording', icon: Languages },
     { id: 'photo', label: 'Photos', icon: Camera },
     { id: 'schedule', label: 'Schedule', icon: Clock },
     { id: 'details', label: 'Details', icon: Sparkles },
@@ -398,14 +404,224 @@ export function TemplateCustomizerDrawer({
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Google Maps URL</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-700">Google Maps URL</label>
+                {customData.mapUrl && (
+                  <a 
+                    href={customData.mapUrl} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="text-[11px] text-[#006989] hover:underline font-semibold flex items-center gap-1"
+                  >
+                    <span>Test Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
               <input
                 type="text"
-                placeholder="https://maps.google.com/?q=..."
+                placeholder="https://maps.app.goo.gl/... or https://maps.google.com/..."
                 value={customData.mapUrl || ''}
                 onChange={(e) => onChangeCustomData({ ...customData, mapUrl: e.target.value })}
                 className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#006989] outline-none text-xs"
               />
+              <p className="text-[10px] text-slate-400 mt-1">
+                Paste any Google Maps link (e.g. <code>maps.app.goo.gl</code> or full link) — the template map and directions button update automatically!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: WORDING & TEXTS & LANGUAGE */}
+        {activeTab === 'wording' && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            {/* Click-to-edit banner */}
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
+              <Sparkles className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+              <span>
+                <strong>Visual Click-to-Edit:</strong> You can edit fields below OR tap directly on any text inside the invitation card to edit it in place!
+              </span>
+            </div>
+
+            {/* Language Quick-Switch Buttons */}
+            <div>
+              <label className="block font-bold text-slate-700 mb-1.5 text-xs">
+                Language Preset (1-Click Switch)
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeCustomData({
+                      ...customData,
+                      language: 'en',
+                      envelopeText: 'Tap to Open',
+                      countdownTitle: 'The Celebration Begins',
+                      timelineTitle: 'Event Timeline',
+                      locationTitle: 'Location',
+                      mapTitle: 'Google Maps Directions',
+                      rsvpTitle: 'Confirm Your Attendance',
+                      rsvpButtonText: 'SUBMIT RSVP',
+                      rsvpNameLabel: 'Full Name',
+                      rsvpCountLabel: 'Number of Guests',
+                      rsvpAttendLabel: 'Will you be attending?',
+                      rsvpYesLabel: 'Joyfully Accept',
+                      rsvpNoLabel: 'Regretfully Decline',
+                      closingText: 'Looking forward to celebrating with you',
+                      invitationText: `Together with their families\n\n${customData.partner1 || 'Amira'} & ${customData.partner2 || 'Yusuf'}\n\nrequest the honour of your presence\nat their wedding celebration\n\n${customData.dateText || 'Saturday, May 20, 2027'}\nat ${customData.timeInput || '4:00 PM'}\n\nat`
+                    });
+                  }}
+                  className="px-2.5 py-2 rounded-xl border border-slate-300 hover:border-[#006989] hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                >
+                  <span>🇬🇧</span>
+                  <span>English</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeCustomData({
+                      ...customData,
+                      language: 'fr',
+                      envelopeText: 'Appuyez pour ouvrir',
+                      countdownTitle: 'La Célébration Commence',
+                      timelineTitle: "Chronologie de l'événement",
+                      locationTitle: 'Lieu',
+                      mapTitle: 'Itinéraire Google Maps',
+                      rsvpTitle: 'Confirmez Votre Présence',
+                      rsvpButtonText: 'SOUMETTRE',
+                      rsvpNameLabel: 'Nom',
+                      rsvpCountLabel: 'Nombre de personnes',
+                      rsvpAttendLabel: 'Serez-vous présent?',
+                      rsvpYesLabel: 'Oui, je serai présent(e)',
+                      rsvpNoLabel: 'Désolé(e), je ne pourrai pas être présent(e)',
+                      closingText: 'Au plaisir de vous accueillir',
+                      invitationText: `Ensemble avec leurs familles\n\n${customData.partner1 || 'Amira'} & ${customData.partner2 || 'Yusuf'}\n\nont l'honneur de vous convier\nà la célébration de leur mariage\n\n${customData.dateText || 'Le Samedi 20 Mai 2027'}\nà ${customData.timeInput || '16h00'}\n\nau`
+                    });
+                  }}
+                  className="px-2.5 py-2 rounded-xl border border-slate-300 hover:border-[#006989] hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                >
+                  <span>🇫🇷</span>
+                  <span>Français</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeCustomData({
+                      ...customData,
+                      language: 'ar',
+                      envelopeText: 'اضغط للفتح',
+                      countdownTitle: 'العد التنازلي للحفل',
+                      timelineTitle: 'برنامج الحفل',
+                      locationTitle: 'المكان',
+                      mapTitle: 'موقع الحفل على خرائط جوجل',
+                      rsvpTitle: 'تأكيد الحضور',
+                      rsvpButtonText: 'إرسال التأكيد',
+                      rsvpNameLabel: 'الاسم الكريم',
+                      rsvpCountLabel: 'عدد الحضور',
+                      rsvpAttendLabel: 'هل ستشرفوننا بالحضور؟',
+                      rsvpYesLabel: 'نعم، يشرفني الحضور',
+                      rsvpNoLabel: 'للأسف، لا أستطيع الحضور',
+                      closingText: 'يسعدنا ويشرفنا حضوركم',
+                      invitationText: `الآنسة ${customData.partner1 || 'أميرة'} والسيد ${customData.partner2 || 'يوسف'}\n\nيسعدهما ويشرفهما أن يدعوا حضرتكم الكريمة\nلمشاركتهما فرحة حفل زفافهما\n\nوذلك بمشيئة الله تعالى\n${customData.dateText || 'يوم السبت 20 ماي 2027'}\nعلى الساعة ${customData.timeInput || 'الرابعة مساءً'}\n\nبقاعة`
+                    });
+                  }}
+                  className="px-2.5 py-2 rounded-xl border border-slate-300 hover:border-[#006989] hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                >
+                  <span>🇲🇦</span>
+                  <span>العربية</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Formal Invitation Announcement */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-700 text-xs">
+                  Formal Invitation Announcement / نص الدعوة
+                </label>
+                <span className="text-[10px] text-slate-400">Card Inside</span>
+              </div>
+              <textarea
+                rows={5}
+                dir={customData.language === 'ar' || /[\u0600-\u06FF]/.test(customData.invitationText || '') ? 'rtl' : 'ltr'}
+                value={customData.invitationText || ''}
+                onChange={(e) => onChangeCustomData({ ...customData, invitationText: e.target.value })}
+                placeholder="Write your custom invitation wording here..."
+                className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#006989] outline-none text-xs leading-relaxed font-serif"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">
+                Customize the exact invitation paragraph in any language.
+              </p>
+            </div>
+
+            {/* Section Headings Customization */}
+            <div className="pt-2 border-t border-slate-200 space-y-3">
+              <span className="text-xs uppercase tracking-wider text-slate-500 font-bold block">
+                Section Titles & Form
+              </span>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Envelope Button</label>
+                  <input
+                    type="text"
+                    value={customData.envelopeText || ''}
+                    onChange={(e) => onChangeCustomData({ ...customData, envelopeText: e.target.value })}
+                    placeholder="e.g. Tap to Open"
+                    className="w-full p-2 rounded-lg border border-slate-300 text-xs focus:border-[#006989] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Countdown Title</label>
+                  <input
+                    type="text"
+                    value={customData.countdownTitle || ''}
+                    onChange={(e) => onChangeCustomData({ ...customData, countdownTitle: e.target.value })}
+                    placeholder="e.g. The Celebration Begins"
+                    className="w-full p-2 rounded-lg border border-slate-300 text-xs focus:border-[#006989] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Timeline Title</label>
+                  <input
+                    type="text"
+                    value={customData.timelineTitle || ''}
+                    onChange={(e) => onChangeCustomData({ ...customData, timelineTitle: e.target.value })}
+                    placeholder="e.g. Event Timeline"
+                    className="w-full p-2 rounded-lg border border-slate-300 text-xs focus:border-[#006989] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">RSVP Title</label>
+                  <input
+                    type="text"
+                    value={customData.rsvpTitle || ''}
+                    onChange={(e) => onChangeCustomData({ ...customData, rsvpTitle: e.target.value })}
+                    placeholder="e.g. Confirm Attendance"
+                    className="w-full p-2 rounded-lg border border-slate-300 text-xs focus:border-[#006989] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">RSVP Submit Button</label>
+                  <input
+                    type="text"
+                    value={customData.rsvpButtonText || ''}
+                    onChange={(e) => onChangeCustomData({ ...customData, rsvpButtonText: e.target.value })}
+                    placeholder="e.g. SUBMIT RSVP"
+                    className="w-full p-2 rounded-lg border border-slate-300 text-xs focus:border-[#006989] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Map Directions Header</label>
+                  <input
+                    type="text"
+                    value={customData.mapTitle || ''}
+                    onChange={(e) => onChangeCustomData({ ...customData, mapTitle: e.target.value })}
+                    placeholder="e.g. Directions"
+                    className="w-full p-2 rounded-lg border border-slate-300 text-xs focus:border-[#006989] outline-none"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -97,9 +97,20 @@
     blossomOudCouple: "[data-artboard-recid='2443433723'] [field='tn_text_1779566247730000001']",
     blossomOudConnector: "[data-artboard-recid='2443433723'] [field='tn_text_1779566247730000004']",
     blossomOudDate: "[data-artboard-recid='2443433723'] [field='tn_text_1779566247730000003']",
+    blossomOudSubtitle: "[field='tn_text_1779626065755000001']",
+    blossomOudEnvelopeBtn: "[field='tn_text_1777183175514000001']",
+    blossomOudArabicText: "[data-artboard-recid='2443433743'] [field='tn_text_1779624381838000001']",
+    blossomOudCountdownHeader: "[data-artboard-recid='2443433763'] [field='tn_text_1771277026942000001']",
+    blossomOudTimelineHeader: "[data-artboard-recid='2443433773'] [field='tn_text_1771277026942000001']",
     blossomOudVenue: "[data-artboard-recid='2443433783'] [field='tn_text_1779544773135']",
     blossomOudCity: "[data-artboard-recid='2443433783'] [field='tn_text_1779545032699000001']",
+    blossomOudLocationHeader: "[data-artboard-recid='2443433783'] [field='tn_text_1771277026942000001']",
     blossomOudDressCode: "[data-artboard-recid='2443433793'] [field='tn_text_1779544773135']",
+    blossomOudDressHeader: "[data-artboard-recid='2443433793'] [field='tn_text_1771277026942000001']",
+    blossomOudMapHeader: "[data-artboard-recid='2443433823'] [field='tn_text_1771277026942000001']",
+    blossomOudRsvpHeader: "[data-artboard-recid='2443433803'] [field='tn_text_1771277026942000001']",
+    blossomOudRsvpForm: "[data-elem-id='1779545532876']",
+    blossomOudClosingText: "[field='tn_text_1763405219328']",
 
     // 3. Dolce Vita
     dolceVitaHeadline: "[data-artboard-recid='2442650993'] [field='tn_text_1776948176126']",
@@ -738,15 +749,22 @@
 
     // 4. UPDATE MULTILINE COUPLE
     if (p1 || p2) {
-      var multilineHtml = '';
-      if (p1 && p2) {
-        multilineHtml = p1 + '<br /><br />' + p2;
-      } else {
-        multilineHtml = p1 || p2;
-      }
-
       tracked.multilineCoupleNodes.forEach(function (node) {
-        try { node.innerHTML = multilineHtml; } catch (e) {}
+        try {
+          node.style.setProperty('line-height', '1.12', 'important');
+          node.style.setProperty('display', 'block', 'important');
+          if (node.closest("[data-artboard-recid='2443433723']")) {
+            node.style.setProperty('transform', 'translateY(-14px)', 'important');
+          }
+          if (p1 && p2) {
+            node.innerHTML = 
+              '<div style="line-height: 1.12; margin-bottom: 6px; font-size: inherit; font-family: inherit;">' + p1 + '</div>' +
+              (conn && conn !== '&' ? '<div style="font-size: 24px; line-height: 1; margin: 2px 0 6px 0; opacity: 0.85;">' + conn + '</div>' : '') +
+              '<div style="line-height: 1.12; font-size: inherit; font-family: inherit;">' + p2 + '</div>';
+          } else {
+            node.innerHTML = '<div style="line-height: 1.12;">' + (p1 || p2) + '</div>';
+          }
+        } catch (e) {}
       });
 
       // 5. UPDATE SINGLE-LINE COUPLE
@@ -860,6 +878,46 @@
       updateTimelessGraceLocation(data.venueName, data.venueAddress);
     }
 
+    // 8b. UPDATE GOOGLE MAPS EMBED & DIRECTIONS LINK
+    var mapQuery = data.venueAddress || data.venueName || '';
+    var rawMapUrl = data.mapUrl || '';
+    var embedSrc = '';
+
+    if (rawMapUrl && rawMapUrl.includes('google.com/maps/embed')) {
+      embedSrc = rawMapUrl;
+    } else if (mapQuery) {
+      embedSrc = 'https://maps.google.com/maps?q=' + encodeURIComponent(mapQuery) + '&output=embed';
+    } else if (rawMapUrl) {
+      embedSrc = 'https://maps.google.com/maps?q=' + encodeURIComponent(rawMapUrl) + '&output=embed';
+    }
+
+    if (embedSrc) {
+      var mapIframes = document.querySelectorAll('iframe[src*="google.com/maps"]');
+      mapIframes.forEach(function (ifr) {
+        if (!ifr.src || ifr.src !== embedSrc) {
+          ifr.src = embedSrc;
+        }
+      });
+    }
+
+    // Direction links on button & map
+    var directionsLink = rawMapUrl || (mapQuery ? ('https://maps.google.com/?q=' + encodeURIComponent(mapQuery)) : '');
+    if (directionsLink) {
+      var mapHeaders = [
+        document.querySelector(SPECIFIC_SELECTORS.blossomOudMapHeader),
+        document.querySelector("[data-elem-id='1710614957366']")
+      ];
+      mapHeaders.forEach(function (el) {
+        if (!el) return;
+        el.style.cursor = 'pointer';
+        el.setAttribute('title', 'Open in Google Maps');
+        el.onclick = function (e) {
+          e.stopPropagation();
+          window.open(directionsLink, '_blank');
+        };
+      });
+    }
+
     // 9. UPDATE PHOTO
     if (data.photoUrl) {
       tracked.photoNodes.forEach(function (img) {
@@ -929,6 +987,96 @@
       });
     }
 
+    // 13. UPDATE WORDING & CUSTOM TEXTS
+    // Envelope Button
+    if (data.envelopeText) {
+      var envBtn = document.querySelector(SPECIFIC_SELECTORS.blossomOudEnvelopeBtn);
+      if (envBtn) envBtn.innerText = data.envelopeText;
+    }
+
+    // Cover Subtitle
+    if (data.coverSubtitle || data.timeInput) {
+      var subElem = document.querySelector(SPECIFIC_SELECTORS.blossomOudSubtitle);
+      if (subElem) {
+        subElem.innerText = data.coverSubtitle || ('à partir de ' + (data.timeInput || '16h'));
+      }
+    }
+
+    // Arabic Formal Invitation Text
+    var arabicElem = document.querySelector(SPECIFIC_SELECTORS.blossomOudArabicText);
+    if (arabicElem) {
+      if (data.invitationText) {
+        arabicElem.innerHTML = data.invitationText.replace(/\n/g, '<br />');
+      } else if (p1 || p2 || data.dateText) {
+        arabicElem.innerHTML = 
+          'الآنسة ' + (p1 || 'أميرة') + ' والسيد ' + (p2 || 'يوسف') + '<br /><br />' +
+          'يسعدهما ويشرفهما أن يدعوا حضرتكم الكريمة<br />' +
+          'لمشاركتهما فرحة حفل زفافهما<br /><br />' +
+          'وذلك بمشيئة الله تعالى ' + (data.dateText ? data.dateText : 'يوم السبت 20 ماي 2027') + '<br />' +
+          (data.timeInput ? 'على الساعة ' + data.timeInput : 'على الساعة الرابعة مساءً') + '<br /><br />' +
+          'بقاعة <br /><br />';
+      }
+    }
+
+    // Countdown Title
+    if (data.countdownTitle) {
+      var cdHeader = document.querySelector(SPECIFIC_SELECTORS.blossomOudCountdownHeader);
+      if (cdHeader) cdHeader.innerText = data.countdownTitle;
+    }
+
+    // Timeline Title
+    if (data.timelineTitle) {
+      var tlHeader = document.querySelector(SPECIFIC_SELECTORS.blossomOudTimelineHeader);
+      if (tlHeader) tlHeader.innerText = data.timelineTitle;
+    }
+
+    // Location Title
+    if (data.locationTitle) {
+      var locHeader = document.querySelector(SPECIFIC_SELECTORS.blossomOudLocationHeader);
+      if (locHeader) locHeader.innerText = data.locationTitle;
+    }
+
+    // Map Header Title
+    if (data.mapTitle) {
+      var mHeader = document.querySelector(SPECIFIC_SELECTORS.blossomOudMapHeader);
+      if (mHeader) mHeader.innerText = data.mapTitle;
+    }
+
+    // RSVP Header Title
+    if (data.rsvpTitle) {
+      var rsvpHeader = document.querySelector(SPECIFIC_SELECTORS.blossomOudRsvpHeader);
+      if (rsvpHeader) rsvpHeader.innerText = data.rsvpTitle;
+    }
+
+    // Closing Text
+    if (data.closingText) {
+      var closingElem = document.querySelector(SPECIFIC_SELECTORS.blossomOudClosingText);
+      if (closingElem) closingElem.innerText = data.closingText;
+    }
+
+    // RSVP Form Labels & Button
+    var rsvpForm = document.querySelector(SPECIFIC_SELECTORS.blossomOudRsvpForm);
+    if (rsvpForm) {
+      if (data.rsvpButtonText) {
+        var submitBtn = rsvpForm.querySelector('.t-submit, button[type="submit"], .t-btn');
+        if (submitBtn) submitBtn.innerText = data.rsvpButtonText;
+      }
+      var titles = rsvpForm.querySelectorAll('.t-input-title');
+      if (titles.length >= 1 && data.rsvpNameLabel) titles[0].innerText = data.rsvpNameLabel;
+      if (titles.length >= 2 && data.rsvpCountLabel) titles[1].innerText = data.rsvpCountLabel;
+      if (titles.length >= 3 && data.rsvpAttendLabel) titles[2].innerText = data.rsvpAttendLabel;
+
+      var radios = rsvpForm.querySelectorAll('.t-radio__control');
+      if (radios.length >= 1 && data.rsvpYesLabel) {
+        var txtSpan1 = radios[0].querySelector('.t-radio__text') || radios[0];
+        txtSpan1.innerText = data.rsvpYesLabel;
+      }
+      if (radios.length >= 2 && data.rsvpNoLabel) {
+        var txtSpan2 = radios[1].querySelector('.t-radio__text') || radios[1];
+        txtSpan2.innerText = data.rsvpNoLabel;
+      }
+    }
+
     lastApplied = {
       partner1: p1,
       partner2: p2,
@@ -977,19 +1125,87 @@
   }
 
   function setupInteractiveClicks() {
+    if (window.self !== window.top && !document.getElementById('wbg-edit-styles')) {
+      var style = document.createElement('style');
+      style.id = 'wbg-edit-styles';
+      style.textContent = 
+        '.wbg-editable-hover { position: relative; cursor: pointer !important; transition: outline 0.15s ease, background 0.15s ease !important; }' +
+        '.wbg-editable-hover:hover { outline: 2px dashed #cebb78 !important; outline-offset: 3px !important; background-color: rgba(206, 187, 120, 0.12) !important; border-radius: 4px !important; }' +
+        '.wbg-editing-active { outline: 2px solid #10b981 !important; outline-offset: 3px !important; background-color: rgba(16, 185, 129, 0.15) !important; border-radius: 4px !important; }';
+      document.head.appendChild(style);
+    }
+
+    // Attach hover effects to editable elements
+    if (window.self !== window.top) {
+      var markEditable = function () {
+        document.querySelectorAll('.tn-atom, h1, h2, h3, p, .std-names, .pl-cap-names, .pp-nm').forEach(function (el) {
+          if (el.closest('.popup-enter, #audio-control, .t-submit, button, a, #wbg-preview-bar, .seal-monogram, [data-animate-sbs-event="click"]')) {
+            return;
+          }
+          if (!el.querySelector('img, svg, iframe') && (el.innerText || '').trim().length > 1) {
+            el.classList.add('wbg-editable-hover');
+          }
+        });
+      };
+      markEditable();
+      setTimeout(markEditable, 1000);
+    }
+
     document.addEventListener('click', function (e) {
       var target = e.target;
+
+      // Do NOT intercept or modify buttons, wax seals, audio controls, or links!
+      if (target.closest('.popup-enter, #audio-control, .t-submit, button, a, #wbg-preview-bar, .seal-monogram, [data-animate-sbs-event="click"]')) {
+        return;
+      }
+
       var atom = target.closest('.tn-atom') || target;
       var text = (atom.innerText || '').toLowerCase();
+      var role = atom.getAttribute('data-wbg-role') || '';
 
-      if (tracked.partner1Nodes.includes(atom) || tracked.partner2Nodes.includes(atom) || tracked.coupleNodes.includes(atom) || tracked.multilineCoupleNodes.includes(atom)) {
-        window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'names' }, '*');
-      } else if (tracked.dateNodes.includes(atom) || text.includes('date') || text.includes('reveal')) {
-        window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'date' }, '*');
-      } else if (tracked.venueNodes.includes(atom) || text.includes('location') || text.includes('venue')) {
-        window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'venue' }, '*');
+      var field = 'wording';
+      if (tracked.partner1Nodes.includes(atom) || tracked.partner2Nodes.includes(atom) || tracked.coupleNodes.includes(atom) || tracked.multilineCoupleNodes.includes(atom) || role.includes('partner') || role.includes('couple')) {
+        field = 'names';
+      } else if (tracked.dateNodes.includes(atom) || text.includes('date') || text.includes('reveal') || text.includes('célébration') || text.includes('celebration') || role === 'date') {
+        field = 'date';
+      } else if (tracked.venueNodes.includes(atom) || text.includes('location') || text.includes('venue') || text.includes('itin') || text.includes('lieu') || role === 'venue' || role === 'address') {
+        field = 'venue';
       } else if (target.tagName === 'IMG' && tracked.photoNodes.includes(target)) {
-        window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'photo' }, '*');
+        field = 'photo';
+      } else if (text.includes('reception') || text.includes('ceremony') || text.includes('dinner') || text.includes('party') || text.includes('timeline') || text.includes('chronologie')) {
+        field = 'schedule';
+      } else if (text.includes('dress code') || text.includes('attire') || text.includes('gift') || role === 'dresscode') {
+        field = 'details';
+      } else {
+        field = 'wording';
+      }
+
+      // Notify parent to open corresponding customizer tab
+      try {
+        window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: field, text: atom.innerText }, '*');
+      } catch (err) {}
+
+      // If user clicked inside the studio iframe on a text atom, allow direct inline editing
+      var isTextAtom = !atom.querySelector('img, svg, iframe') && (atom.innerText || '').trim().length > 0;
+      if (window.self !== window.top && isTextAtom && atom.isContentEditable === false && atom.tagName !== 'IMG' && atom.tagName !== 'IFRAME') {
+        atom.contentEditable = 'true';
+        atom.classList.add('wbg-editing-active');
+        atom.focus();
+
+        var onBlur = function () {
+          atom.contentEditable = 'false';
+          atom.classList.remove('wbg-editing-active');
+          atom.removeEventListener('blur', onBlur);
+          try {
+            window.parent.postMessage({
+              type: 'WBG_INLINE_EDIT',
+              field: field,
+              role: role,
+              text: atom.innerText
+            }, '*');
+          } catch (err) {}
+        };
+        atom.addEventListener('blur', onBlur);
       }
     }, true);
   }
