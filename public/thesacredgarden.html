@@ -205,34 +205,54 @@ document.addEventListener('DOMContentLoaded',t_setvisRecs);}})();</script></head
   50%       { transform: rotate(-45deg) translate(2px, -2px); opacity: 1; }
 }
 
+/* ── Dynamic Seal Opening Animation ── */
+.wei-opening #weiSealInitials {
+  animation: weiSealBurst 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes weiSealBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4));
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1.2);
+    filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 70px rgba(255, 180, 50, 0.85));
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+    filter: drop-shadow(0 0 60px rgba(255, 215, 0, 1));
+  }
+}
+
+.wei-opening #weiEnvelopeWrap {
+  animation: weiEnvelopeOpen 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes weiEnvelopeOpen {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03) translateY(-12px);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.08) translateY(-45px);
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+.wei-opening #weiTapWrap {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
 #weiVideoWrap {
-  position: fixed;
-  inset: 0;
-  z-index: 100000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F9F0E0;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-  pointer-events: none;
-}
-
-#weiVideoWrap.wei-video-in {
-  opacity: 1;
-  pointer-events: all;
-}
-
-#weiVideoWrap.wei-video-out {
-  opacity: 0;
-  transition: opacity 1.4s ease;
-}
-
-#weiVideo {
-  width: 100%;
-  max-width: 440px;
-  display: block;
-  object-fit: contain;
+  display: none !important;
 }
 
 /* ── Floating audio button — hidden until invitation revealed ── */
@@ -309,20 +329,26 @@ document.addEventListener('DOMContentLoaded',t_setvisRecs);}})();</script></head
     if (done) return;
     done = true;
 
-    // Fade out envelope
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    setTimeout(function () { overlay.style.display = 'none'; }, 1400);
-
-    // Show and play video
-    videoWrap.classList.add('wei-video-in');
-    var vp = video.play();
-    if (vp && vp.catch) vp.catch(function(){});
-
     // Start music simultaneously
     audio.volume = 1;
     var ap = audio.play();
     if (ap && ap.catch) ap.catch(function(){});
+
+    // Animate envelope opening with personalized wax seal glow
+    overlay.classList.add('wei-opening');
+
+    // Show floating audio button
+    audioBtn.style.visibility = 'visible';
+    audioBtn.style.opacity = '1';
+
+    // Fade out overlay completely after opening animation
+    setTimeout(function () {
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      setTimeout(function () {
+        overlay.style.display = 'none';
+      }, 700);
+    }, 950);
   }
 
   function endSequence() {
