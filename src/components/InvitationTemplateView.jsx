@@ -721,13 +721,13 @@ export function InvitationTemplateView({
       </header>
 
       {/* Main Container Area */}
-      <div className={`flex-1 relative flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-1 sm:p-6 overflow-hidden transition-all duration-300 ${
+      <div className={`flex-1 relative flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 p-2 sm:p-4 lg:p-6 overflow-hidden transition-all duration-300 ${
         isCustomizerOpen
           ? mobileSheetMode === 'half'
-            ? 'pb-[50vh] md:pb-0 lg:pr-[450px]'
+            ? 'pb-[50vh] md:pb-0'
             : mobileSheetMode === 'peek'
-            ? 'pb-[58px] md:pb-0 lg:pr-[450px]'
-            : 'pb-[88vh] md:pb-0 lg:pr-[450px]'
+            ? 'pb-[58px] md:pb-0'
+            : 'pb-[88vh] md:pb-0'
           : ''
       }`}>
         
@@ -744,29 +744,54 @@ export function InvitationTemplateView({
         )}
 
         {viewMode === 'mobile' ? (
-          /* Smartphone Bezel Container (adaptive on real phones) */
-          <div className={`relative w-full max-w-[420px] transition-all duration-300 ${
-            isCustomizerOpen ? 'h-full max-h-full sm:max-h-[860px]' : 'h-[94vh] max-h-[860px]'
-          } bg-black rounded-none sm:rounded-[48px] p-0 sm:p-3 shadow-2xl border-0 sm:border-[4px] border-slate-700/80 flex flex-col animate-in fade-in zoom-in-95 duration-200`}>
+          /* Side-by-side studio layout on laptop/desktop; single phone on mobile */
+          <div className="flex flex-row items-center justify-center gap-6 lg:gap-8 w-full max-w-6xl h-full">
             
-            {/* Dynamic Island / Speaker Pill - hidden on small mobile to maximize viewable area */}
-            <div className="hidden sm:flex absolute top-4 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-30 items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-slate-900 border border-slate-800 ml-auto mr-2" />
+            {/* Smartphone Bezel Container */}
+            <div className={`relative w-full max-w-[390px] sm:max-w-[410px] transition-all duration-300 ${
+              isCustomizerOpen ? 'h-full max-h-[860px]' : 'h-[94vh] max-h-[860px]'
+            } bg-black rounded-none sm:rounded-[48px] p-0 sm:p-3 shadow-2xl border-0 sm:border-[4px] border-slate-700/80 flex flex-col shrink-0 animate-in fade-in zoom-in-95 duration-200`}>
+              
+              {/* Dynamic Island / Speaker Pill */}
+              <div className="hidden sm:flex absolute top-4 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-30 items-center justify-center">
+                <div className="w-3 h-3 rounded-full bg-slate-900 border border-slate-800 ml-auto mr-2" />
+              </div>
+
+              {/* Iframe Viewport inside phone */}
+              <div className="relative w-full h-full rounded-none sm:rounded-[38px] overflow-hidden bg-white">
+                <iframe
+                  ref={iframeRef}
+                  src={info.url}
+                  title={info.name}
+                  className="w-full h-full border-0"
+                  onLoad={handleIframeLoad}
+                />
+              </div>
+
+              {/* Bottom Home Indicator Bar */}
+              <div className="hidden sm:block w-32 h-1 bg-slate-600 rounded-full mx-auto mt-2 shrink-0 opacity-60" />
             </div>
 
-            {/* Iframe Viewport inside phone */}
-            <div className="relative w-full h-full rounded-none sm:rounded-[38px] overflow-hidden bg-white">
-              <iframe
-                ref={iframeRef}
-                src={info.url}
-                title={info.name}
-                className="w-full h-full border-0"
-                onLoad={handleIframeLoad}
-              />
-            </div>
-
-            {/* Bottom Home Indicator Bar */}
-            <div className="hidden sm:block w-32 h-1 bg-slate-600 rounded-full mx-auto mt-2 shrink-0 opacity-60" />
+            {/* Desktop Side-by-Side Personalizer Panel (Placed right next to phone on laptop/desktop!) */}
+            {isCustomizerOpen && (
+              <div className="hidden md:flex flex-col w-[440px] lg:w-[480px] h-full max-h-[860px] bg-white rounded-3xl shadow-2xl border border-slate-700/70 overflow-hidden shrink-0 animate-in fade-in slide-in-from-right-6 duration-200 z-30">
+                <TemplateCustomizerDrawer
+                  isOpen={true}
+                  isInlineDesktop={true}
+                  onClose={() => setIsCustomizerOpen(false)}
+                  templateInfo={info}
+                  customData={customData}
+                  onChangeCustomData={handleCustomDataChange}
+                  onResetCustomData={handleResetCustomData}
+                  onUpdateView={handleForceUpdateView}
+                  isUpdating={isUpdating}
+                  onSaveAndOrder={(data) => {
+                    setIsCustomizerOpen(false);
+                    onOrder(info.id, data);
+                  }}
+                />
+              </div>
+            )}
           </div>
         ) : (
           /* Full Page Viewport */
@@ -783,23 +808,46 @@ export function InvitationTemplateView({
 
       </div>
 
-      {/* Slide-Over / Bottom-Sheet Template Customizer Drawer */}
-      <TemplateCustomizerDrawer
-        isOpen={isCustomizerOpen}
-        onClose={() => setIsCustomizerOpen(false)}
-        templateInfo={info}
-        customData={customData}
-        onChangeCustomData={handleCustomDataChange}
-        onResetCustomData={handleResetCustomData}
-        onUpdateView={handleForceUpdateView}
-        isUpdating={isUpdating}
-        mobileSheetMode={mobileSheetMode}
-        onMobileSheetModeChange={setMobileSheetMode}
-        onSaveAndOrder={(data) => {
-          setIsCustomizerOpen(false);
-          onOrder(info.id, data);
-        }}
-      />
+      {/* Mobile Bottom-Sheet Template Customizer Drawer (Visible only on mobile screens < md) */}
+      <div className="md:hidden">
+        <TemplateCustomizerDrawer
+          isOpen={isCustomizerOpen}
+          onClose={() => setIsCustomizerOpen(false)}
+          templateInfo={info}
+          customData={customData}
+          onChangeCustomData={handleCustomDataChange}
+          onResetCustomData={handleResetCustomData}
+          onUpdateView={handleForceUpdateView}
+          isUpdating={isUpdating}
+          mobileSheetMode={mobileSheetMode}
+          onMobileSheetModeChange={setMobileSheetMode}
+          onSaveAndOrder={(data) => {
+            setIsCustomizerOpen(false);
+            onOrder(info.id, data);
+          }}
+        />
+      </div>
+
+      {/* Desktop Docked Sidebar (Only when user views in Full Page mode) */}
+      {viewMode === 'full' && isCustomizerOpen && (
+        <div className="hidden md:block">
+          <TemplateCustomizerDrawer
+            isOpen={true}
+            isDockedSidebar={true}
+            onClose={() => setIsCustomizerOpen(false)}
+            templateInfo={info}
+            customData={customData}
+            onChangeCustomData={handleCustomDataChange}
+            onResetCustomData={handleResetCustomData}
+            onUpdateView={handleForceUpdateView}
+            isUpdating={isUpdating}
+            onSaveAndOrder={(data) => {
+              setIsCustomizerOpen(false);
+              onOrder(info.id, data);
+            }}
+          />
+        </div>
+      )}
 
     </div>
   );

@@ -36,6 +36,8 @@ export function TemplateCustomizerDrawer({
   isUpdating = false,
   mobileSheetMode = 'half',
   onMobileSheetModeChange,
+  isInlineDesktop = false,
+  isDockedSidebar = false,
   onSaveAndOrder 
 }) {
   const [activeTab, setActiveTab] = useState('names'); // 'names', 'date', 'venue', 'photo', 'schedule', 'details'
@@ -69,22 +71,23 @@ export function TemplateCustomizerDrawer({
     { id: 'details', label: 'Details', icon: Sparkles },
   ];
 
-  return (
-    <aside className={`fixed z-50 bg-white shadow-2xl border-slate-200 flex flex-col transition-all duration-300 ease-out
-      /* Desktop styling: right-hand sidebar */
-      md:inset-y-0 md:right-0 md:left-auto md:w-full md:max-w-md md:h-full md:rounded-none md:border-l md:border-t-0
-      /* Mobile styling: Smart Bottom Sheet that preserves card view */
-      ${
+  const containerClasses = isInlineDesktop
+    ? 'w-full h-full bg-white flex flex-col overflow-hidden text-slate-800'
+    : isDockedSidebar
+    ? 'fixed z-50 top-14 bottom-0 right-0 w-full max-w-md bg-white shadow-2xl border-l border-slate-200 flex flex-col transition-all duration-300'
+    : `fixed z-50 bg-white shadow-2xl border-slate-200 flex flex-col transition-all duration-300 ease-out md:hidden ${
         sheetMode === 'half'
           ? 'bottom-0 inset-x-0 h-[50vh] max-h-[50vh] rounded-t-3xl border-t shadow-[0_-12px_30px_rgba(0,0,0,0.35)]'
           : sheetMode === 'peek'
           ? 'bottom-0 inset-x-0 h-[56px] max-h-[56px] rounded-t-2xl border-t shadow-[0_-8px_20px_rgba(0,0,0,0.25)] overflow-hidden'
           : 'bottom-0 inset-x-0 h-[88vh] max-h-[88vh] rounded-t-3xl border-t shadow-[0_-12px_30px_rgba(0,0,0,0.35)]'
-      }
-    `}>
+      }`;
+
+  return (
+    <aside className={containerClasses}>
       
       {/* Mobile Collapsed Peek Bar (Allows 100% full view of the card on phone) */}
-      {sheetMode === 'peek' ? (
+      {!isInlineDesktop && !isDockedSidebar && sheetMode === 'peek' ? (
         <div 
           onClick={() => setSheetMode('half')}
           className="h-[56px] px-4 bg-[#08004b] text-white flex items-center justify-between cursor-pointer md:hidden hover:bg-[#0c006b] transition-all shrink-0"
@@ -117,40 +120,42 @@ export function TemplateCustomizerDrawer({
       ) : (
         <>
           {/* Mobile Top Actions Bar (Visible only on mobile phones) */}
-          <div className="md:hidden flex items-center justify-between px-3.5 py-1.5 bg-[#08004b] text-white border-b border-slate-800 shrink-0">
-            <button
-              onClick={() => setSheetMode('peek')}
-              className="flex items-center gap-1 text-xs font-bold text-amber-300 bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-full transition-all"
-              title="Minimize editor to see full card"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>View Full Card</span>
-            </button>
-
-            {/* Drag Handle indicator */}
-            <div 
-              onClick={() => setSheetMode(sheetMode === 'half' ? 'full' : 'half')}
-              className="w-12 h-1.5 bg-white/40 hover:bg-white/70 rounded-full cursor-pointer transition-all"
-              title="Click to toggle size"
-            />
-
-            <div className="flex items-center gap-1.5">
+          {!isInlineDesktop && !isDockedSidebar && (
+            <div className="md:hidden flex items-center justify-between px-3.5 py-1.5 bg-[#08004b] text-white border-b border-slate-800 shrink-0">
               <button
-                onClick={() => setSheetMode(sheetMode === 'full' ? 'half' : 'full')}
-                className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 transition-all"
-                title={sheetMode === 'full' ? "Split View (Half Screen)" : "Expand Editor"}
+                onClick={() => setSheetMode('peek')}
+                className="flex items-center gap-1 text-xs font-bold text-amber-300 bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-full transition-all"
+                title="Minimize editor to see full card"
               >
-                {sheetMode === 'full' ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                <Eye className="w-3.5 h-3.5" />
+                <span>View Full Card</span>
               </button>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 transition-all"
-                title="Close"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+
+              {/* Drag Handle indicator */}
+              <div 
+                onClick={() => setSheetMode(sheetMode === 'half' ? 'full' : 'half')}
+                className="w-12 h-1.5 bg-white/40 hover:bg-white/70 rounded-full cursor-pointer transition-all"
+                title="Click to toggle size"
+              />
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setSheetMode(sheetMode === 'full' ? 'half' : 'full')}
+                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 transition-all"
+                  title={sheetMode === 'full' ? "Split View (Half Screen)" : "Expand Editor"}
+                >
+                  {sheetMode === 'full' ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 transition-all"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Main Header */}
           <div className="p-3 sm:p-4 bg-[#08004b] text-white flex items-center justify-between border-b border-slate-800 shrink-0">
@@ -182,8 +187,8 @@ export function TemplateCustomizerDrawer({
 
               <button
                 onClick={onClose}
-                className="hidden md:flex w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white items-center justify-center transition-all"
-                title="Close Drawer"
+                className="flex w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white items-center justify-center transition-all"
+                title="Close"
               >
                 <X className="w-4 h-4" />
               </button>
