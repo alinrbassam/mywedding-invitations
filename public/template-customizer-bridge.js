@@ -600,6 +600,65 @@
       '<div style="font-family:\'Rufina\',\'Cinzel\',Georgia,serif;font-size:14px;font-weight:400;color:#806b43;line-height:1.35;max-width:250px;text-align:center;">' + vAddr + '</div>';
   }
 
+  // Update Wax Seal Monogram (e.g. envelope overlay or RSVP seals)
+  function updateWaxSealMonograms(rawInitials, connector, p1, p2) {
+    var text = (rawInitials || '').trim();
+    if (!text && (p1 || p2)) {
+      text = ((p1 ? p1[0] : '') + (p2 ? p2[0] : '')).toUpperCase();
+    }
+    if (!text) return;
+
+    var conn = connector || '&';
+    if (text.includes('&')) conn = '&';
+    else if (text.includes('+')) conn = '+';
+    else if (text.includes('•')) conn = '•';
+
+    var letters = text.replace(/[^a-zA-Z0-9]/g, '');
+    var char1 = '', char2 = '';
+
+    if (text.includes('&') || text.includes('+') || text.includes('•') || text.includes(' ')) {
+      var parts = text.split(/[&+•\s]+/).filter(Boolean);
+      if (parts.length >= 2) {
+        char1 = parts[0].toUpperCase();
+        char2 = parts[1].toUpperCase();
+      } else if (parts.length === 1) {
+        char1 = parts[0].toUpperCase();
+      }
+    } else if (letters.length === 2) {
+      char1 = letters[0].toUpperCase();
+      char2 = letters[1].toUpperCase();
+    } else if (letters.length === 1) {
+      char1 = letters[0].toUpperCase();
+    } else if (letters.length > 2) {
+      char1 = letters[0].toUpperCase();
+      char2 = letters.slice(1).toUpperCase();
+    }
+
+    var sealElements = document.querySelectorAll('.seal-monogram, [data-seal-initials], #weiSealInitials');
+    sealElements.forEach(function (elem) {
+      elem.setAttribute('data-seal-initials', text);
+      if (elem.id === 'weiSealInitials' || elem.classList.contains('seal-monogram')) {
+        if (char1 && char2) {
+          elem.innerHTML =
+            '<div class="seal-staggered">' +
+              '<span class="seal-char seal-p1">' + char1 + '</span>' +
+              '<span class="seal-char seal-amp">' + conn + '</span>' +
+              '<span class="seal-char seal-p2">' + char2 + '</span>' +
+            '</div>';
+        } else if (char1) {
+          elem.innerHTML =
+            '<div class="seal-single">' +
+              '<span class="seal-char seal-main">' + char1 + '</span>' +
+            '</div>';
+        } else {
+          elem.innerText = text;
+        }
+      } else {
+        elem.innerText = text;
+      }
+    });
+  }
+
   // Load and apply saved customization from sessionStorage / localStorage
   function loadSavedCustomization() {
     try {
@@ -715,14 +774,10 @@
           }
         });
       }
-
-      var sealInitials = data.initials || ((p1 ? p1[0] : '') + (p2 ? p2[0] : '')).toUpperCase();
-      if (sealInitials) {
-        document.querySelectorAll('.seal-monogram, [data-seal-initials]').forEach(function (elem) {
-          elem.innerText = sealInitials;
-        });
-      }
     }
+
+    // 5b. UPDATE WAX SEAL / MONOGRAM
+    updateWaxSealMonograms(data.initials, data.connector || conn, p1, p2);
 
     // Update Timeless Grace Hero Screen
     updateTimelessGraceHero(p1, p2, conn, data.ceremonyTitle);
