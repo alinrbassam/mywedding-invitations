@@ -1,16 +1,5 @@
 export const TEMPLATES = [
   {
-    id: 'the-sacred-garden',
-    name: 'The Sacred Garden',
-    desc: 'Soft florals, golden elegance, eternal love.',
-    badge: 'NEW ✨',
-    badgeType: 'new',
-    demo: '/thesacredgarden.html',
-    gif: 'https://pub-4dc8201144ca418fb604349c73e8c724.r2.dev/IMG_1595-ezgif.com-resize.gif',
-    tags: ['Romantic', 'Floral', 'Elegance'],
-    color: '#3d614b'
-  },
-  {
     id: 'blossom-oud',
     name: 'Blossom & Oud',
     desc: 'Inspired by Arabian luxury and timeless love.',
@@ -128,8 +117,6 @@ export const SAVE_THE_DATES = [
 ];
 
 export const TEMPLATE_PAGES = {
-  'the-sacred-garden': '/thesacredgarden.html',
-  'thesacredgarden': '/thesacredgarden.html',
   'blossom-oud': '/blossomoud.html',
   'blossomoud': '/blossomoud.html',
   'dolce-vita': '/dolcevita.html',

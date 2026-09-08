@@ -6,8 +6,6 @@ import {
 import { TemplateCustomizerDrawer } from './TemplateCustomizerDrawer';
 
 const TEMPLATE_INFO = {
-  'the-sacred-garden': { id: 'the-sacred-garden', name: 'The Sacred Garden', price: '€75', url: '/thesacredgarden.html', type: 'template' },
-  'thesacredgarden': { id: 'the-sacred-garden', name: 'The Sacred Garden', price: '€75', url: '/thesacredgarden.html', type: 'template' },
   'blossom-oud': { id: 'blossom-oud', name: 'Blossom & Oud', price: '€75', url: '/blossomoud.html', type: 'template' },
   'blossomoud': { id: 'blossom-oud', name: 'Blossom & Oud', price: '€75', url: '/blossomoud.html', type: 'template' },
   'dolce-vita': { id: 'dolce-vita', name: 'Dolce Vita', price: '€75', url: '/dolcevita.html', type: 'template' },
@@ -32,49 +30,6 @@ const TEMPLATE_INFO = {
 };
 
 const DEFAULT_TEMPLATE_DATA = {
-  'the-sacred-garden': {
-    partner1: 'Zohan',
-    partner2: 'Rose',
-    connector: '&',
-    initials: 'ZR',
-    dateText: 'September 27, 2026',
-    dateInput: '2026-09-27',
-    timeInput: '17:00',
-    targetDate: '2026-09-27T17:00:00',
-    venueName: 'Islamic Center of Melville',
-    venueAddress: '118 Old East Neck Road, Melville, NY 11747',
-    mapUrl: 'https://maps.google.com/?q=118+Old+East+Neck+Road+Melville+NY+11747',
-    photoUrl: '',
-    welcomeMessage: 'Dear Friends and Family, join us for an evening of love, laughter, duas, and unforgettable memories as we begin our forever.',
-    dressCode: 'We kindly ask guests to avoid deep red and maroon attire for the celebration.',
-    giftPreference: 'Kindly, no boxed gifts please.',
-    rsvpDeadline: 'August 09, 2026',
-    schedule: [
-      { time: '5:00 PM', title: 'Guest Arrival', note: 'Welcome drinks & seating', icon: '🌸' },
-      { time: '6:00 PM', title: 'Nikkah Ceremony', note: 'Solemnization of marriage', icon: '💍' },
-      { time: '7:00 PM', title: 'Mocktail Hour', note: 'Hors d’oeuvres & conversation', icon: '🥂' },
-      { time: '8:00 PM', title: 'Dinner', note: 'Gourmet banquet', icon: '🍽️' },
-      { time: '9:00 PM', title: 'Dance & Duas', note: 'Celebration and farewell', icon: '✨' }
-    ]
-  },
-  'thesacredgarden': {
-    partner1: 'Zohan',
-    partner2: 'Rose',
-    connector: '&',
-    initials: 'ZR',
-    dateText: 'September 27, 2026',
-    dateInput: '2026-09-27',
-    timeInput: '17:00',
-    targetDate: '2026-09-27T17:00:00',
-    venueName: 'Islamic Center of Melville',
-    venueAddress: '118 Old East Neck Road, Melville, NY 11747',
-    mapUrl: 'https://maps.google.com/?q=118+Old+East+Neck+Road+Melville+NY+11747',
-    photoUrl: '',
-    welcomeMessage: 'Dear Friends and Family, join us for an evening of love, laughter, duas, and unforgettable memories as we begin our forever.',
-    dressCode: 'We kindly ask guests to avoid deep red and maroon attire for the celebration.',
-    giftPreference: 'Kindly, no boxed gifts please.',
-    rsvpDeadline: 'August 09, 2026'
-  },
   'timeless-grace': {
     partner1: 'Daanish',
     partner2: 'Adeena',
@@ -476,12 +431,12 @@ const DEFAULT_TEMPLATE_DATA = {
 };
 
 export function InvitationTemplateView({ 
-  templateId = 'the-sacred-garden', 
+  templateId = 'blossom-oud', 
   onBack, 
   onOrder,
   initialCustomData = null
 }) {
-  const info = TEMPLATE_INFO[templateId] || TEMPLATE_INFO['the-sacred-garden'];
+  const info = TEMPLATE_INFO[templateId] || TEMPLATE_INFO['blossom-oud'];
   const [viewMode, setViewMode] = useState('mobile'); // 'mobile' or 'full'
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -491,7 +446,7 @@ export function InvitationTemplateView({
   const iframeRef = useRef(null);
 
   // Initialize custom data
-  const baseDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['the-sacred-garden'];
+  const baseDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['blossom-oud'];
   const [customData, setCustomData] = useState(() => {
     return initialCustomData || { ...baseDefaults };
   });
@@ -499,7 +454,7 @@ export function InvitationTemplateView({
   // Keep custom data in sync when switching templates
   useEffect(() => {
     if (!initialCustomData) {
-      const newDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['the-sacred-garden'];
+      const newDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['blossom-oud'];
       setCustomData({ ...newDefaults });
     }
   }, [templateId, initialCustomData]);

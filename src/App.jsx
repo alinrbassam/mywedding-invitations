@@ -48,7 +48,7 @@ export function App() {
           const slug = path.replace('invite/', '');
           const savedCustom = sessionStorage.getItem('wbg_custom_' + slug.replace(/[^a-z0-9]/gi, '')) ||
                               localStorage.getItem('wbg_custom_' + slug.replace(/[^a-z0-9]/gi, ''));
-          setViewingTemplateId('the-sacred-garden');
+          setViewingTemplateId('blossom-oud');
           return;
         }
         if (TEMPLATE_PAGES[path]) {
