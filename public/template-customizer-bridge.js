@@ -7,6 +7,17 @@
 (function () {
   'use strict';
 
+  // Intercept countdown timers so they don't fight with user customized date
+  var origSetInterval = window.setInterval;
+  window.setInterval = function (fn, delay) {
+    var fnStr = fn ? fn.toString() : '';
+    var id = origSetInterval.apply(this, arguments);
+    if (fnStr.includes('countdownContainer') || fnStr.includes('eventLocal') || fnStr.includes('eventDate')) {
+      window.__wbg_origCountdownInterval = id;
+    }
+    return id;
+  };
+
   // Master list of known couple names across all templates
   var KNOWN_PARTNER_1 = [
     'Daanish', 'Zohan', 'Amira', 'Alexa', 'Elisabeth', 'Thanu', 
@@ -49,6 +60,7 @@
     'Chateau de Vaux-le-Vicomte',
     'Central Park',
     'Villa Balbianello',
+    'Villa Borghese',
     'One&Only Royal Mirage'
   ];
 
@@ -68,47 +80,95 @@
     'September 27, 2026', 'September 14, 2025', 'October 10, 2025'
   ];
 
-  // Specific atom selectors for guaranteed zero-miss targeting
+  // Specific atom selectors scoped by artboard for 100% collision-free targeting
   var SPECIFIC_SELECTORS = {
-    // Timeless Grace
+    // 1. The Sacred Garden
+    sacredGardenMultiline: "[data-artboard-recid='2487446043'] [field='tn_text_1763402147625']",
+    sacredGardenConnector: "[data-artboard-recid='2487446043'] [field='tn_text_176340390975774690']",
+    sacredGardenDate: "[data-artboard-recid='2487446043'] [field='tn_text_176340401720454780']",
+    sacredGardenVenue: "[data-artboard-recid='2487446153'] [field='tn_text_1772804808869']",
+    sacredGardenAddress: "[data-artboard-recid='2487446153'] [field='tn_text_1772813480591000001']",
+    sacredGardenDressCode: "[data-artboard-recid='2487446183'] [field='tn_text_1778524751695000001']",
+    sacredGardenGift: "[data-artboard-recid='2487446183'] [field='tn_text_1772813849329000001']",
+    sacredGardenAttendance: "[data-artboard-recid='2487446223'] [field='tn_text_1772813849329000001']",
+    sacredGardenEnding: "[data-artboard-recid='2487446253'] [field='tn_text_1772813849329000001']",
+
+    // 2. Blossom & Oud
+    blossomOudCouple: "[data-artboard-recid='2443433723'] [field='tn_text_1779566247730000001']",
+    blossomOudConnector: "[data-artboard-recid='2443433723'] [field='tn_text_1779566247730000004']",
+    blossomOudDate: "[data-artboard-recid='2443433723'] [field='tn_text_1779566247730000003']",
+    blossomOudVenue: "[data-artboard-recid='2443433783'] [field='tn_text_1779544773135']",
+    blossomOudCity: "[data-artboard-recid='2443433783'] [field='tn_text_1779545032699000001']",
+    blossomOudDressCode: "[data-artboard-recid='2443433793'] [field='tn_text_1779544773135']",
+
+    // 3. Dolce Vita
+    dolceVitaHeadline: "[data-artboard-recid='2442650993'] [field='tn_text_1776948176126']",
+    dolceVitaEnding: "[data-artboard-recid='2442651163'] [field='tn_text_1710522265391']",
+    dolceVitaVenue: "[data-artboard-recid='2442651083'] [field='tn_text_1776866271348000003']",
+    dolceVitaDressCode: "[data-artboard-recid='2442651093'] [field='tn_text_1741427070967']",
+    dolceVitaTileDay: "#tdr-tile-day .tdr-num",
+    dolceVitaTileMonth: "#tdr-tile-month .tdr-num",
+    dolceVitaTileYear: "#tdr-tile-year .tdr-num",
+
+    // 4. Timeless Grace
     timelessGraceP1: "[field='tn_text_1782990372985000002']",
     timelessGraceP2: "[field='tn_text_1782990570479000010']",
     timelessGraceConnector: "[field='tn_text_1782990549039000006']",
 
-    // Blossom & Oud
-    blossomOudCouple: "[field='tn_text_1779566247730000001']",
-    blossomOudConnector: "[field='tn_text_1779566247730000004']",
+    // 5. Vibrant Vows
+    vibrantVowsMultiline: "[data-artboard-recid='2049114373'] [field='tn_text_1763402147625']",
+    vibrantVowsConnector: "[data-artboard-recid='2049114373'] [field='tn_text_176340390975774690']",
+    vibrantVowsDate: "[data-artboard-recid='2049114373'] [field='tn_text_176340401720454780']",
+    vibrantVowsVenue: "[data-artboard-recid='2002802231'] [field='tn_text_1772804808869']",
+    vibrantVowsDressCode: "[data-artboard-recid='2003451831'] [field='tn_text_1772813849329000001']",
+    vibrantVowsAttendance: "[data-artboard-recid='2003860951'] [field='tn_text_1772813849329000001']",
+    vibrantVowsEnding: "[data-artboard-recid='2003869491'] [field='tn_text_1772813849329000001']",
 
-    // The Sacred Garden & Vibrant Vows
-    sacredVowsMultiline: "[field='tn_text_1763402147625']",
-    sacredVowsConnector: "[field='tn_text_176340390975774690']",
-    sacredVowsEnding: "[field='tn_text_1772813849329000001']",
+    // 6. Destination Love
+    destLovePass: "[data-artboard-recid='1141006106'] [field='tn_text_1739457970056']",
+    destLoveFlightBadge: "[data-artboard-recid='1141006106'] [field='tn_text_1739457970065']",
+    destLoveCity: "[data-artboard-recid='1141006106'] [field='tn_text_1739457970068']",
+    destLoveFullName: "[data-artboard-recid='1141006111'] [field='tn_text_1741107633653']",
+    destLoveDate: "[data-artboard-recid='1141006111'] [field='tn_text_1741107633658']",
+    destLoveDressCode: "[data-artboard-recid='1141006136'] [field='tn_text_1741427070967']",
+    destLoveEnding: "[data-artboard-recid='1141006181'] [field='tn_text_1705236303923']",
 
-    // Dolce Vita
-    dolceVitaHeadline: "[field='tn_text_1776948176126']",
-    dolceVitaEnding: "[field='tn_text_1710522265391']",
+    // 7. Eternal Romance
+    eternalRomanceHeadline: "[data-artboard-recid='1875002761'] [field='tn_text_1730310670429']",
+    eternalRomanceDate: "[data-artboard-recid='1875002761'] [field='tn_text_1730310670422']",
+    eternalRomanceMidDate: "[data-artboard-recid='1960320961'] [field='tn_text_1705235414658']",
+    eternalRomanceDressCode: "[data-artboard-recid='1875002791'] [field='tn_text_1730375467556']",
+    eternalRomanceEnding: "[data-artboard-recid='1875002821'] [field='tn_text_1710522265391']",
 
-    // Destination Love
-    destLovePass: "[field='tn_text_1739457970056']",
-    destLoveFullName: "[field='tn_text_1741107633653']",
-    destLoveEnding: "[field='tn_text_1705236303923']",
+    // 8. Royal Gold
+    royalGoldHeadline: "[data-artboard-recid='2225136913'] [field='tn_text_1709580515237']",
+    royalGoldDate: "[data-artboard-recid='2225136913'] [field='tn_text_1709580515218']",
+    royalGoldTimeline1: "[data-artboard-recid='2225136953'] [field='tn_text_1709506567892']",
+    royalGoldTimeline2: "[data-artboard-recid='2225136953'] [field='tn_text_1709506567893']",
+    royalGoldDressCode: "[data-artboard-recid='2225136963'] [field='tn_text_1709507064325']",
+    royalGoldEnding: "[data-artboard-recid='2225137003'] [field='tn_text_1688726914364']",
 
-    // Eternal Romance
-    eternalRomanceHeadline: "[field='tn_text_1730310670429']",
-    eternalRomanceEnding: "[field='tn_text_1710522265391']",
+    // 9. Minimalist
+    minimalistHeadline: "[data-artboard-recid='1037605266'] [field='tn_text_1690458811493']",
+    minimalistDate: "[data-artboard-recid='1037605266'] [field='tn_text_1690458811484']",
+    minimalistCity: "[data-artboard-recid='1037605266'] [field='tn_text_1690458811491']",
+    minimalistBigDate: "[data-artboard-recid='621270577'] [field='tn_text_1690458966885']",
+    minimalistVenue: "[data-artboard-recid='1037618816'] [field='tn_text_1746701376970']",
+    minimalistEnding: "[data-artboard-recid='632297248'] [field='tn_text_1692969909762']",
 
-    // Royal Gold
-    royalGoldHeadline: "[field='tn_text_1709580515237']",
-    royalGoldEnding: "[field='tn_text_1688726914364']",
+    // 10. Golden Secret
+    stdNames: ".std-names",
+    stdDate: "#std-date, .std-date",
+    stdVenue: ".std-venue, .std-loc",
 
-    // Minimalist
-    minimalistHeadline: "[field='tn_text_1690458811493']",
-    minimalistEnding: "[field='tn_text_1692969909762']",
+    // 11. Petal Promise
+    petalNames: ".pp-nm",
+    petalVenue: ".pp-lc",
 
-    // Save the Date interactive templates
-    stdNames: ".std-names, .std-couple-names",
+    // 12. Captured Love
     polaroidNames: ".pl-cap-names",
-    petalNames: ".pp-nm, .pp-hd"
+    polaroidDate: ".pl-rev-date",
+    polaroidVenue: ".pl-rev-venue"
   };
 
   var tracked = {
@@ -120,8 +180,11 @@
     dateNodes: [],
     venueNodes: [],
     addressNodes: [],
+    dressCodeNodes: [],
+    giftNodes: [],
     photoNodes: [],
-    countdown: {}
+    countdown: {},
+    dolceVitaTiles: {}
   };
 
   var lastApplied = {
@@ -130,7 +193,10 @@
     fullName: '',
     dateText: '',
     venueName: '',
-    venueAddress: ''
+    venueAddress: '',
+    dressCode: '',
+    giftPreference: '',
+    welcomeMessage: ''
   };
 
   var countdownInterval = null;
@@ -140,7 +206,6 @@
     return str ? String(str).trim() : '';
   }
 
-  // Tag an element with a customizer role for future instant lookups
   function tagRole(elem, role) {
     if (!elem) return;
     try {
@@ -151,42 +216,69 @@
 
   // Scan and discover all customizable elements in the current template
   function discoverElements() {
+    tracked.partner1Nodes = [];
+    tracked.partner2Nodes = [];
+    tracked.connectorNodes = [];
+    tracked.coupleNodes = [];
+    tracked.multilineCoupleNodes = [];
+    tracked.dateNodes = [];
+    tracked.venueNodes = [];
+    tracked.addressNodes = [];
+    tracked.dressCodeNodes = [];
+    tracked.giftNodes = [];
+    tracked.photoNodes = [];
+    tracked.countdown = {};
+    tracked.dolceVitaTiles = {};
+
     // 1. Check known specific selectors
     var p1Elem = document.querySelector(SPECIFIC_SELECTORS.timelessGraceP1);
-    if (p1Elem && tracked.partner1Nodes.indexOf(p1Elem) === -1) {
+    if (p1Elem) {
       tracked.partner1Nodes.push(p1Elem);
       tagRole(p1Elem, 'partner1');
     }
 
     var p2Elem = document.querySelector(SPECIFIC_SELECTORS.timelessGraceP2);
-    if (p2Elem && tracked.partner2Nodes.indexOf(p2Elem) === -1) {
+    if (p2Elem) {
       tracked.partner2Nodes.push(p2Elem);
       tagRole(p2Elem, 'partner2');
     }
 
-    var connElem = document.querySelector(SPECIFIC_SELECTORS.timelessGraceConnector);
-    if (connElem && tracked.connectorNodes.indexOf(connElem) === -1) {
-      tracked.connectorNodes.push(connElem);
-      tagRole(connElem, 'connector');
-    }
+    var connSelectors = [
+      SPECIFIC_SELECTORS.timelessGraceConnector,
+      SPECIFIC_SELECTORS.sacredGardenConnector,
+      SPECIFIC_SELECTORS.blossomOudConnector,
+      SPECIFIC_SELECTORS.vibrantVowsConnector
+    ];
+    connSelectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (tracked.connectorNodes.indexOf(el) === -1) {
+          tracked.connectorNodes.push(el);
+          tagRole(el, 'connector');
+        }
+      });
+    });
 
-    var blossomElem = document.querySelector(SPECIFIC_SELECTORS.blossomOudCouple);
-    if (blossomElem && tracked.multilineCoupleNodes.indexOf(blossomElem) === -1) {
-      tracked.multilineCoupleNodes.push(blossomElem);
-      tagRole(blossomElem, 'couple-multiline');
-    }
+    // Multiline couple elements
+    var multilineSelectors = [
+      SPECIFIC_SELECTORS.sacredGardenMultiline,
+      SPECIFIC_SELECTORS.blossomOudCouple,
+      SPECIFIC_SELECTORS.vibrantVowsMultiline
+    ];
+    multilineSelectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (tracked.multilineCoupleNodes.indexOf(el) === -1) {
+          tracked.multilineCoupleNodes.push(el);
+          tagRole(el, 'couple-multiline');
+        }
+      });
+    });
 
-    var sacredElem = document.querySelector(SPECIFIC_SELECTORS.sacredVowsMultiline);
-    if (sacredElem && tracked.multilineCoupleNodes.indexOf(sacredElem) === -1) {
-      tracked.multilineCoupleNodes.push(sacredElem);
-      tagRole(sacredElem, 'couple-multiline');
-    }
-
-    // Couple single-line elements
+    // Single-line couple elements
     var singleLineSelectors = [
-      SPECIFIC_SELECTORS.sacredVowsEnding,
+      SPECIFIC_SELECTORS.sacredGardenEnding,
       SPECIFIC_SELECTORS.dolceVitaHeadline,
       SPECIFIC_SELECTORS.dolceVitaEnding,
+      SPECIFIC_SELECTORS.vibrantVowsEnding,
       SPECIFIC_SELECTORS.destLovePass,
       SPECIFIC_SELECTORS.destLoveFullName,
       SPECIFIC_SELECTORS.destLoveEnding,
@@ -200,27 +292,108 @@
       SPECIFIC_SELECTORS.polaroidNames,
       SPECIFIC_SELECTORS.petalNames
     ];
-
     singleLineSelectors.forEach(function (sel) {
-      try {
-        var elems = document.querySelectorAll(sel);
-        elems.forEach(function (el) {
-          if (tracked.coupleNodes.indexOf(el) === -1) {
-            tracked.coupleNodes.push(el);
-            tagRole(el, 'couple-single');
-          }
-        });
-      } catch (e) {}
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (tracked.coupleNodes.indexOf(el) === -1) {
+          tracked.coupleNodes.push(el);
+          tagRole(el, 'couple-single');
+        }
+      });
     });
 
-    // 2. Scan all .tn-atom and general heading/div nodes
+    // Date specific elements
+    var specificDateSelectors = [
+      SPECIFIC_SELECTORS.sacredGardenDate,
+      SPECIFIC_SELECTORS.blossomOudDate,
+      SPECIFIC_SELECTORS.vibrantVowsDate,
+      SPECIFIC_SELECTORS.destLoveFlightBadge,
+      SPECIFIC_SELECTORS.destLoveDate,
+      SPECIFIC_SELECTORS.eternalRomanceDate,
+      SPECIFIC_SELECTORS.eternalRomanceMidDate,
+      SPECIFIC_SELECTORS.royalGoldDate,
+      SPECIFIC_SELECTORS.royalGoldTimeline1,
+      SPECIFIC_SELECTORS.royalGoldTimeline2,
+      SPECIFIC_SELECTORS.minimalistDate,
+      SPECIFIC_SELECTORS.minimalistBigDate,
+      SPECIFIC_SELECTORS.stdDate,
+      SPECIFIC_SELECTORS.polaroidDate
+    ];
+    specificDateSelectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (tracked.dateNodes.indexOf(el) === -1) {
+          tracked.dateNodes.push(el);
+          tagRole(el, 'date');
+        }
+      });
+    });
+
+    // Venue specific elements
+    var specificVenueSelectors = [
+      SPECIFIC_SELECTORS.sacredGardenVenue,
+      SPECIFIC_SELECTORS.sacredGardenAddress,
+      SPECIFIC_SELECTORS.blossomOudVenue,
+      SPECIFIC_SELECTORS.blossomOudCity,
+      SPECIFIC_SELECTORS.dolceVitaVenue,
+      SPECIFIC_SELECTORS.vibrantVowsVenue,
+      SPECIFIC_SELECTORS.destLoveCity,
+      SPECIFIC_SELECTORS.minimalistVenue,
+      SPECIFIC_SELECTORS.minimalistCity,
+      SPECIFIC_SELECTORS.stdVenue,
+      SPECIFIC_SELECTORS.petalVenue,
+      SPECIFIC_SELECTORS.polaroidVenue
+    ];
+    specificVenueSelectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (tracked.venueNodes.indexOf(el) === -1) {
+          tracked.venueNodes.push(el);
+          tagRole(el, 'venue');
+        }
+      });
+    });
+
+    // Dolce Vita Date Scratch Tiles
+    var dvDay = document.querySelector(SPECIFIC_SELECTORS.dolceVitaTileDay);
+    var dvMonth = document.querySelector(SPECIFIC_SELECTORS.dolceVitaTileMonth);
+    var dvYear = document.querySelector(SPECIFIC_SELECTORS.dolceVitaTileYear);
+    if (dvDay) tracked.dolceVitaTiles.day = dvDay;
+    if (dvMonth) tracked.dolceVitaTiles.month = dvMonth;
+    if (dvYear) tracked.dolceVitaTiles.year = dvYear;
+
+    // Gift Preference elements
+    var giftElem = document.querySelector(SPECIFIC_SELECTORS.sacredGardenGift);
+    if (giftElem) tracked.giftNodes.push(giftElem);
+
+    // Dress Code elements
+    var dressSelectors = [
+      SPECIFIC_SELECTORS.sacredGardenDressCode,
+      SPECIFIC_SELECTORS.blossomOudDressCode,
+      SPECIFIC_SELECTORS.dolceVitaDressCode,
+      SPECIFIC_SELECTORS.vibrantVowsDressCode,
+      SPECIFIC_SELECTORS.destLoveDressCode,
+      SPECIFIC_SELECTORS.eternalRomanceDressCode,
+      SPECIFIC_SELECTORS.royalGoldDressCode
+    ];
+    dressSelectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (tracked.dressCodeNodes.indexOf(el) === -1) {
+          tracked.dressCodeNodes.push(el);
+          tagRole(el, 'dresscode');
+        }
+      });
+    });
+
+    // 2. Scan remaining general .tn-atom and divs for zero-miss detection
     var allAtoms = Array.from(document.querySelectorAll('.tn-atom, h1, h2, h3, .std-names, .pl-cap-names, .pp-nm'));
 
     allAtoms.forEach(function (el) {
       var raw = (el.innerText || '').trim();
       if (!raw || raw.length < 2 || raw.length > 120) return;
 
-      // Check partner 1 alone
+      var lower = raw.toLowerCase();
+      if (lower.includes('boxed gifts') || lower.includes('attendance') || lower.includes('dress code') || lower.includes('attire')) return;
+      if (lower.includes('countdown') || lower.includes('celebration begins')) return;
+
+      // Partner 1 alone
       for (var i = 0; i < KNOWN_PARTNER_1.length; i++) {
         var p1 = KNOWN_PARTNER_1[i];
         if (raw.toLowerCase() === p1.toLowerCase()) {
@@ -232,7 +405,7 @@
         }
       }
 
-      // Check partner 2 alone
+      // Partner 2 alone
       for (var j = 0; j < KNOWN_PARTNER_2.length; j++) {
         var p2 = KNOWN_PARTNER_2[j];
         if (raw.toLowerCase() === p2.toLowerCase()) {
@@ -244,11 +417,10 @@
         }
       }
 
-      // Check couple combined
+      // Couple combined
       for (var k = 0; k < KNOWN_COUPLES.length; k++) {
         var couple = KNOWN_COUPLES[k];
         if (raw.toLowerCase().includes(couple.toLowerCase())) {
-          // Check if multi-line
           if (raw.includes('\n') || el.innerHTML.includes('<br')) {
             if (tracked.multilineCoupleNodes.indexOf(el) === -1) {
               tracked.multilineCoupleNodes.push(el);
@@ -264,7 +436,7 @@
         }
       }
 
-      // Check Date
+      // Dates
       for (var d = 0; d < KNOWN_DATES.length; d++) {
         var dt = KNOWN_DATES[d];
         if (raw.toLowerCase().includes(dt.toLowerCase())) {
@@ -276,15 +448,7 @@
         }
       }
 
-      // Check generic date patterns
-      if (/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}/i.test(raw) || /\b\d{2}\.\d{2}\.\d{2,4}\b/.test(raw)) {
-        if (!raw.includes('Countdown') && !raw.includes('Day') && tracked.dateNodes.indexOf(el) === -1) {
-          tracked.dateNodes.push(el);
-          tagRole(el, 'date');
-        }
-      }
-
-      // Check Venue
+      // Venues
       for (var v = 0; v < KNOWN_VENUES.length; v++) {
         var vn = KNOWN_VENUES[v];
         if (raw.toLowerCase().includes(vn.toLowerCase())) {
@@ -296,7 +460,7 @@
         }
       }
 
-      // Check Address
+      // Addresses
       for (var a = 0; a < KNOWN_ADDRESSES.length; a++) {
         var ad = KNOWN_ADDRESSES[a];
         if (raw.toLowerCase().includes(ad.toLowerCase())) {
@@ -309,11 +473,11 @@
       }
     });
 
-    // 3. Countdown timer elements
-    var daysEl = document.getElementById('days') || document.querySelector('.tdr-num') || document.querySelector('#tb-days .number');
+    // 3. Countdown timer elements (Never include .tdr-num!)
+    var daysEl = document.getElementById('days') || document.querySelector('#tb-days .number');
     var hoursEl = document.getElementById('hours') || document.querySelector('#tb-hours .number');
-    var minEl = document.getElementById('minutes') || document.querySelector('#tb-minutes .number');
-    var secEl = document.getElementById('seconds') || document.querySelector('#tb-seconds .number');
+    var minEl = document.getElementById('minutes') || document.querySelector('#tb-minutes .number') || document.querySelector('#tb-mins .number');
+    var secEl = document.getElementById('seconds') || document.querySelector('#tb-seconds .number') || document.querySelector('#tb-secs .number');
 
     if (daysEl) tracked.countdown.days = daysEl;
     if (hoursEl) tracked.countdown.hours = hoursEl;
@@ -326,13 +490,12 @@
       var src = img.getAttribute('src') || img.getAttribute('data-original') || '';
       var width = img.naturalWidth || img.clientWidth || parseInt(img.getAttribute('width') || '0', 10);
       var height = img.naturalHeight || img.clientHeight || parseInt(img.getAttribute('height') || '0', 10);
-      var isIcon = src.includes('icon') || src.includes('seal') || src.includes('arrow') || src.includes('Group_269');
+      var isIcon = src.includes('icon') || src.includes('seal') || src.includes('arrow') || src.includes('Group_269') || src.includes('Screenshot_2026');
       return !isIcon && (width > 120 || height > 120 || img.closest('.t396__elem, .pl-img'));
     });
     tracked.photoNodes = coupleImgs;
   }
 
-  // Format date helper: returns "DD.MM.YY" or "MM.DD.YY"
   function formatDateShort(dateStr) {
     if (!dateStr) return '';
     try {
@@ -347,11 +510,11 @@
     }
   }
 
-  // Update Hero Screen for Timeless Grace (Replaces static Screenshot_2026-08-0.png with live typography)
+  // Update Hero Screen for Timeless Grace
   function updateTimelessGraceHero(p1, p2, conn, eventTitle) {
     var heroElems = [
-      document.querySelector("[data-elem-id='1785746425236'] .tn-atom"), // desktop
-      document.querySelector("[data-elem-id='1785746843632'] .tn-atom")  // mobile
+      document.querySelector("[data-elem-id='1785746425236'] .tn-atom"),
+      document.querySelector("[data-elem-id='1785746843632'] .tn-atom")
     ].filter(Boolean);
 
     if (heroElems.length === 0) return;
@@ -363,9 +526,7 @@
 
     heroElems.forEach(function (container) {
       var origImg = container.querySelector('img.tn-atom__img');
-      if (origImg) {
-        origImg.style.display = 'none';
-      }
+      if (origImg) origImg.style.display = 'none';
 
       var dynBox = container.querySelector('.tg-hero-dyn');
       if (!dynBox) {
@@ -400,7 +561,7 @@
     });
   }
 
-  // Update Location Block for Timeless Grace (Replaces static Screenshot_2026-08-0.png in rec2684632903)
+  // Update Location Block for Timeless Grace
   function updateTimelessGraceLocation(venueName, venueAddress) {
     var locContainer = document.querySelector("[data-elem-id='1785747277552'] .tn-atom");
     if (!locContainer) return;
@@ -409,9 +570,7 @@
     var vAddr = venueAddress || 'Dana Ballroom, Dubai, UAE';
 
     var origImg = locContainer.querySelector('img.tn-atom__img');
-    if (origImg) {
-      origImg.style.display = 'none';
-    }
+    if (origImg) origImg.style.display = 'none';
 
     var dynBox = locContainer.querySelector('.tg-loc-dyn');
     if (!dynBox) {
@@ -462,7 +621,6 @@
   function applyCustomization(data) {
     if (!data) return;
 
-    // If elements haven't been indexed or nodes were lost, rediscover
     if (tracked.partner1Nodes.length === 0 && tracked.coupleNodes.length === 0) {
       discoverElements();
     }
@@ -478,15 +636,12 @@
       fullName = p1 || p2;
     }
 
-    // 1. UPDATE PARTNER 1 (Separate atom e.g. Timeless Grace)
+    // 1. UPDATE PARTNER 1
     if (p1) {
       tracked.partner1Nodes.forEach(function (node) {
-        try {
-          node.innerText = p1;
-        } catch (e) {}
+        try { node.innerText = p1; } catch (e) {}
       });
 
-      // Also search any element that currently holds the last applied partner1
       if (lastApplied.partner1 && lastApplied.partner1 !== p1) {
         document.querySelectorAll('.tn-atom').forEach(function (atom) {
           if (atom.innerText.trim() === lastApplied.partner1) {
@@ -497,12 +652,10 @@
       }
     }
 
-    // 2. UPDATE PARTNER 2 (Separate atom e.g. Timeless Grace)
+    // 2. UPDATE PARTNER 2
     if (p2) {
       tracked.partner2Nodes.forEach(function (node) {
-        try {
-          node.innerText = p2;
-        } catch (e) {}
+        try { node.innerText = p2; } catch (e) {}
       });
 
       if (lastApplied.partner2 && lastApplied.partner2 !== p2) {
@@ -515,7 +668,7 @@
       }
     }
 
-    // 3. UPDATE CONNECTOR (e.g. "With" or "&" in Timeless Grace)
+    // 3. UPDATE CONNECTOR
     if (conn) {
       tracked.connectorNodes.forEach(function (node) {
         try {
@@ -524,7 +677,7 @@
       });
     }
 
-    // 4. UPDATE MULTILINE COUPLE (e.g. Blossom & Oud, The Sacred Garden, Vibrant Vows)
+    // 4. UPDATE MULTILINE COUPLE
     if (p1 || p2) {
       var multilineHtml = '';
       if (p1 && p2) {
@@ -534,15 +687,13 @@
       }
 
       tracked.multilineCoupleNodes.forEach(function (node) {
-        try {
-          node.innerHTML = multilineHtml;
-        } catch (e) {}
+        try { node.innerHTML = multilineHtml; } catch (e) {}
       });
 
-      // 5. UPDATE SINGLE-LINE COUPLE (e.g. Dolce Vita, Destination Love, Royal Gold, etc.)
+      // 5. UPDATE SINGLE-LINE COUPLE
       tracked.coupleNodes.forEach(function (node) {
         try {
-          if (node.classList.contains('pl-cap-names') || node.classList.contains('pp-nm')) {
+          if (node.classList.contains('pl-cap-names') || node.classList.contains('pp-nm') || node.classList.contains('std-names')) {
             node.innerHTML = p1 + ' <span class="amp">&amp;</span> ' + p2;
           } else {
             var curr = node.innerText || '';
@@ -557,7 +708,6 @@
         } catch (e) {}
       });
 
-      // Also dynamically update any node matching previous applied fullName
       if (lastApplied.fullName && lastApplied.fullName !== fullName) {
         document.querySelectorAll('.tn-atom').forEach(function (atom) {
           if (atom.innerText.includes(lastApplied.fullName)) {
@@ -566,7 +716,6 @@
         });
       }
 
-      // Update wax seal / monogram
       var sealInitials = data.initials || ((p1 ? p1[0] : '') + (p2 ? p2[0] : '')).toUpperCase();
       if (sealInitials) {
         document.querySelectorAll('.seal-monogram, [data-seal-initials]').forEach(function (elem) {
@@ -594,14 +743,43 @@
         } catch (e) {}
       });
 
-      var stdDateElem = document.querySelector('.std-date, .pl-date, .pp-dt');
-      if (stdDateElem) {
-        stdDateElem.innerText = data.dateText;
+      // Save the Date SPA templates
+      var stdDateElem = document.querySelector(SPECIFIC_SELECTORS.stdDate);
+      if (stdDateElem) stdDateElem.innerText = data.dateText;
+
+      var plRevDate = document.querySelector(SPECIFIC_SELECTORS.polaroidDate);
+      if (plRevDate) {
+        plRevDate.innerText = data.dateText;
+      }
+
+      // Petal Promise Canvas date
+      window.__wbg_petal_date = data.dateText;
+      if (typeof window.__wbg_redrawPetals === 'function') {
+        try { window.__wbg_redrawPetals(); } catch (e) {}
+      }
+
+      // Dolce Vita scratch tiles
+      if (tracked.dolceVitaTiles.day || tracked.dolceVitaTiles.month || tracked.dolceVitaTiles.year) {
+        try {
+          var dObj = data.dateInput ? new Date(data.dateInput) : new Date(data.dateText);
+          if (!isNaN(dObj.getTime())) {
+            var dayNum = dObj.getDate();
+            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            var monthStr = monthNames[dObj.getMonth()];
+            var yearNum = dObj.getFullYear();
+            if (tracked.dolceVitaTiles.day) tracked.dolceVitaTiles.day.innerText = String(dayNum);
+            if (tracked.dolceVitaTiles.month) tracked.dolceVitaTiles.month.innerText = monthStr;
+            if (tracked.dolceVitaTiles.year) tracked.dolceVitaTiles.year.innerText = String(yearNum);
+          }
+        } catch (e) {}
       }
     }
 
     // 7. RECALCULATE LIVE COUNTDOWN TIMER
     if (data.targetDate) {
+      if (window.__wbg_origCountdownInterval) {
+        clearInterval(window.__wbg_origCountdownInterval);
+      }
       targetDateObj = new Date(data.targetDate);
       startCountdownTicker();
     }
@@ -609,20 +787,16 @@
     // 8. UPDATE VENUE & ADDRESS
     if (data.venueName) {
       tracked.venueNodes.forEach(function (node) {
-        try {
-          node.innerText = data.venueName;
-        } catch (e) {}
+        try { node.innerText = data.venueName; } catch (e) {}
       });
-      document.querySelectorAll('.std-loc, .pl-loc, .pp-lc').forEach(function (el) {
+      document.querySelectorAll('.std-venue, .std-loc, .pl-rev-venue, .pp-lc').forEach(function (el) {
         el.innerText = data.venueName;
       });
     }
 
     if (data.venueAddress) {
       tracked.addressNodes.forEach(function (node) {
-        try {
-          node.innerText = 'Address: ' + data.venueAddress;
-        } catch (e) {}
+        try { node.innerText = 'Address: ' + data.venueAddress; } catch (e) {}
       });
     }
 
@@ -646,7 +820,6 @@
       var plImg = document.getElementById('plImg');
       if (plImg) plImg.src = data.photoUrl;
 
-      // Check background-images
       document.querySelectorAll('[style*="background-image"]').forEach(function (bgElem) {
         var style = bgElem.getAttribute('style') || '';
         if (style.includes('tild') && (bgElem.clientWidth > 150 || bgElem.clientHeight > 150)) {
@@ -659,20 +832,14 @@
 
     // 10. UPDATE WELCOME MESSAGE
     if (data.welcomeMessage) {
-      // 10a. Timeless Grace explicit body text element
       var tgWelcome = document.querySelector("[field='tn_text_1782990616505000011']");
-      if (tgWelcome) {
-        tgWelcome.innerText = data.welcomeMessage;
-      }
+      if (tgWelcome) tgWelcome.innerText = data.welcomeMessage;
 
-      // 10b. Update body message across templates without colliding with salutation heading
       document.querySelectorAll('.tn-atom').forEach(function (atom) {
-        // NEVER overwrite salutation headings
         if (atom.getAttribute('field') === 'tn_text_1782990740288000012') return;
         var raw = (atom.innerText || '').trim();
         if (raw === 'Dear Friends and Family' || raw === 'DEAR FAMILY AND FRIENDS') return;
 
-        // Match known body paragraphs or previously applied message
         if (
           raw.includes('Join us for an evening') ||
           raw.includes('unforgettable memories') ||
@@ -689,14 +856,24 @@
 
     // 11. UPDATE DRESS CODE
     if (data.dressCode) {
+      tracked.dressCodeNodes.forEach(function (node) {
+        try { node.innerText = data.dressCode; } catch (e) {}
+      });
       document.querySelectorAll('.tn-atom').forEach(function (atom) {
-        if (atom.innerText && (atom.innerText.toLowerCase().includes('dress code') || atom.innerText.toLowerCase().includes('attire'))) {
+        var raw = (atom.innerText || '').toLowerCase();
+        if (raw.includes('dress code') && raw.length > 20) {
           atom.innerText = data.dressCode;
         }
       });
     }
 
-    // Save state for differential tracking
+    // 12. UPDATE GIFT PREFERENCE
+    if (data.giftPreference) {
+      tracked.giftNodes.forEach(function (node) {
+        try { node.innerText = data.giftPreference; } catch (e) {}
+      });
+    }
+
     lastApplied = {
       partner1: p1,
       partner2: p2,
@@ -704,10 +881,11 @@
       dateText: data.dateText || lastApplied.dateText,
       venueName: data.venueName || lastApplied.venueName,
       venueAddress: data.venueAddress || lastApplied.venueAddress,
+      dressCode: data.dressCode || lastApplied.dressCode,
+      giftPreference: data.giftPreference || lastApplied.giftPreference,
       welcomeMessage: data.welcomeMessage || lastApplied.welcomeMessage
     };
 
-    // Notify parent of successful application
     try {
       window.parent.postMessage({ type: 'WBG_CUSTOMIZATION_APPLIED', timestamp: Date.now() }, '*');
     } catch (e) {}
@@ -743,7 +921,6 @@
     countdownInterval = setInterval(tick, 1000);
   }
 
-  // Setup click-to-edit interactions
   function setupInteractiveClicks() {
     document.addEventListener('click', function (e) {
       var target = e.target;
@@ -762,11 +939,9 @@
     }, true);
   }
 
-  // Expose global function for zero-latency direct synchronous access by parent window
   window.__wbg_applyCustomization = applyCustomization;
   window.__wbg_rediscover = discoverElements;
 
-  // Listen for parent postMessage
   window.addEventListener('message', function (event) {
     if (!event.data || typeof event.data !== 'object') return;
 
@@ -778,13 +953,11 @@
     }
   });
 
-  // Initialization
   function init() {
     discoverElements();
     loadSavedCustomization();
     setupInteractiveClicks();
 
-    // Re-verify at staggered delays to ensure dynamically loaded elements are personalized
     [50, 150, 300, 600, 1200].forEach(function (delay) {
       setTimeout(function () {
         discoverElements();
@@ -797,7 +970,6 @@
     } catch (e) {}
   }
 
-  // Run immediate hydration as early as possible
   try {
     loadSavedCustomization();
   } catch (e) {}

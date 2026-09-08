@@ -142,9 +142,11 @@ function initApp(){
     txtCtx.beginPath();txtCtx.moveTo(122,157);txtCtx.lineTo(178,157);txtCtx.stroke();
     txtCtx.font="italic 500 25px Cormorant Garamond,serif";txtCtx.letterSpacing="0.5px";
     txtCtx.fillStyle="rgba(42,21,16,"+(showD?dA:0.12).toFixed(2)+")";
-    txtCtx.fillText("26 August 2026",150,182);
+    var customPetalDate = window.__wbg_petal_date || "26 August 2026";
+    txtCtx.fillText(customPetalDate,150,182);
     txtCtx.restore();
   }
+  window.__wbg_redrawPetals = dTxt;
   function animD(){showD=true;(function s(){dA=Math.min(dA+0.04,1);dTxt();if(dA<1)requestAnimationFrame(s);})();}
 
   var lastW=0;

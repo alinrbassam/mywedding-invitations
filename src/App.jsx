@@ -31,10 +31,33 @@ export function App() {
   const [legalType, setLegalType] = useState(null); // 'privacy' or 'terms'
   const [viewingTemplateId, setViewingTemplateId] = useState(null);
 
-  // Check URL hash on load and listen for changes
+  // Check URL pathname and hash on load and listen for changes
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleRouteChange = () => {
+      // 1. Check clean path first (e.g. /the-sacred-garden, /dolce-vita, /template/timeless-grace)
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       const hash = window.location.hash.replace('#', '').trim();
+
+      if (path) {
+        if (path.startsWith('template/')) {
+          const id = path.replace('template/', '');
+          setViewingTemplateId(id);
+          return;
+        }
+        if (path.startsWith('invite/')) {
+          const slug = path.replace('invite/', '');
+          const savedCustom = sessionStorage.getItem('wbg_custom_' + slug.replace(/[^a-z0-9]/gi, '')) ||
+                              localStorage.getItem('wbg_custom_' + slug.replace(/[^a-z0-9]/gi, ''));
+          setViewingTemplateId('the-sacred-garden');
+          return;
+        }
+        if (TEMPLATE_PAGES[path]) {
+          setViewingTemplateId(path);
+          return;
+        }
+      }
+
+      // 2. Check URL hash (e.g. #template/the-sacred-garden)
       if (hash.startsWith('template/')) {
         const id = hash.replace('template/', '');
         setViewingTemplateId(id);
@@ -45,9 +68,13 @@ export function App() {
       }
     };
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    handleRouteChange();
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   const handleOpenOrder = (pkg = 'template', designId = null, customData = null) => {
@@ -73,13 +100,13 @@ export function App() {
   const handleOpenFullTemplate = (templateId) => {
     setPreviewTemplate(null);
     setViewingTemplateId(templateId);
-    window.location.hash = `template/${templateId}`;
+    window.history.pushState(null, '', `/${templateId}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackFromTemplate = () => {
     setViewingTemplateId(null);
-    window.location.hash = '';
+    window.history.pushState(null, '', '/');
   };
 
   // If a template is actively being viewed, render the self-hosted invitation page!
