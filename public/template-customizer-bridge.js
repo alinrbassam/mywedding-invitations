@@ -676,7 +676,7 @@
     });
   }
 
-  // Dress Code Palette Selectors for Blossom & Oud
+  // Dress Code Palette Selectors for Blossom & Oud (4 colors)
   var BLOSSOM_OUD_PALETTE_SELECTORS = [
     '[data-elem-id="1780767598424000008"] .tn-atom',
     '[data-elem-id="1780767598425000011"] .tn-atom',
@@ -684,28 +684,91 @@
     '[data-elem-id="1780767598425000017"] .tn-atom'
   ];
 
+  // Dress Code Palette Selectors for Dolce Vita (5 circles from left to right)
+  var DOLCE_VITA_PALETTE_SELECTORS = [
+    '[data-elem-id="1741430557591"] .tn-atom', // 1: Cream (#faf1db)
+    '[data-elem-id="1741430557589"] .tn-atom', // 2: Peach (#f5d9b1)
+    '[data-elem-id="1741430557587"] .tn-atom', // 3: Blush Pink (#f2cac9)
+    '[data-elem-id="1741430557585"] .tn-atom', // 4: Sky Blue (#afcff1)
+    '[data-elem-id="1741430557581"] .tn-atom'  // 5: Ocean Blue (#7ebbfa)
+  ];
+
+  // Dolce Vita Dress Code Layout Auto-Spacing
+  // Dynamically separates cursive dress code heading, secondary instruction, and scroll arrow to prevent collision
+  function adjustDolceVitaDressCodeLayout() {
+    var rec = document.getElementById('rec2442651093');
+    if (!rec) return;
+
+    var elHeading = rec.querySelector('[data-elem-id="1741427070967"]');
+    var elSub = rec.querySelector('[data-elem-id="1741427070972"]');
+    var elArrow = rec.querySelector('[data-elem-id="1741431382522"]');
+    var artboard = rec.querySelector('.t396__artboard');
+    var carrier = rec.querySelector('.t396__carrier');
+    var filter = rec.querySelector('.t396__filter');
+
+    if (!elHeading || !elSub) return;
+
+    // Refine heading styling
+    var headingAtom = elHeading.querySelector('.tn-atom') || elHeading;
+    headingAtom.style.setProperty('font-size', 'clamp(28px, 6vw, 36px)', 'important');
+    headingAtom.style.setProperty('line-height', '1.22', 'important');
+    headingAtom.style.setProperty('text-align', 'center', 'important');
+    headingAtom.style.setProperty('white-space', 'normal', 'important');
+    headingAtom.style.setProperty('word-break', 'normal', 'important');
+    elHeading.style.setProperty('top', '30px', 'important');
+
+    // Subtitle / Note styling
+    var subAtom = elSub.querySelector('.tn-atom') || elSub;
+    subAtom.style.setProperty('text-align', 'center', 'important');
+    subAtom.style.setProperty('line-height', '1.35', 'important');
+
+    // Dynamic vertical separation
+    var h1 = elHeading.offsetHeight || 80;
+    var top2 = 30 + h1 + 18;
+    elSub.style.setProperty('top', top2 + 'px', 'important');
+
+    var h2 = elSub.offsetHeight || 45;
+    var topArrow = top2 + h2 + 16;
+    if (elArrow) {
+      elArrow.style.setProperty('top', topArrow + 'px', 'important');
+    }
+
+    var totalH = topArrow + 40 + 20;
+    if (artboard) artboard.style.setProperty('height', totalH + 'px', 'important');
+    if (carrier) carrier.style.setProperty('height', totalH + 'px', 'important');
+    if (filter) filter.style.setProperty('height', totalH + 'px', 'important');
+  }
+
   function setupDressCodePaletteInteractivity(initialPalette) {
-    var palette = (Array.isArray(initialPalette) && initialPalette.length >= 4)
-      ? initialPalette.slice()
+    var isDolce = !!document.querySelector('[data-elem-id="1741430557591"]');
+    var activeSelectors = isDolce ? DOLCE_VITA_PALETTE_SELECTORS : BLOSSOM_OUD_PALETTE_SELECTORS;
+    var defaultPalette = isDolce
+      ? ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa']
       : ['#60603b', '#360c1a', '#40312c', '#efdfcd'];
 
-    // Force outer rings to be visible
-    var outerSelectors = [
-      '[data-elem-id="1780767598424000007"]',
-      '[data-elem-id="1780767598425000010"]',
-      '[data-elem-id="1780767598425000013"]',
-      '[data-elem-id="1780767598425000016"]'
-    ];
-    outerSelectors.forEach(function (sel) {
-      var el = document.querySelector(sel);
-      if (el) {
-        el.style.setProperty('opacity', '1', 'important');
-        el.style.setProperty('visibility', 'visible', 'important');
-        el.classList.remove('t-animate_hidden');
-      }
-    });
+    var palette = (Array.isArray(initialPalette) && initialPalette.length >= activeSelectors.length)
+      ? initialPalette.slice()
+      : defaultPalette;
 
-    BLOSSOM_OUD_PALETTE_SELECTORS.forEach(function (sel, idx) {
+    // Force outer rings to be visible on Blossom & Oud
+    if (!isDolce) {
+      var outerSelectors = [
+        '[data-elem-id="1780767598424000007"]',
+        '[data-elem-id="1780767598425000010"]',
+        '[data-elem-id="1780767598425000013"]',
+        '[data-elem-id="1780767598425000016"]'
+      ];
+      outerSelectors.forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) {
+          el.style.setProperty('opacity', '1', 'important');
+          el.style.setProperty('visibility', 'visible', 'important');
+          el.classList.remove('t-animate_hidden');
+        }
+      });
+    }
+
+    activeSelectors.forEach(function (sel, idx) {
       var circleAtom = document.querySelector(sel);
       if (!circleAtom) return;
 
@@ -715,6 +778,10 @@
       parentElem.classList.remove('t-animate_hidden');
       circleAtom.style.setProperty('opacity', '1', 'important');
       circleAtom.style.setProperty('visibility', 'visible', 'important');
+
+      if (palette[idx]) {
+        circleAtom.style.setProperty('background-color', palette[idx], 'important');
+      }
 
       parentElem.style.cursor = 'pointer';
       parentElem.setAttribute('title', 'Click to change Color ' + (idx + 1));
@@ -733,7 +800,9 @@
         circleAtom.addEventListener('mouseenter', function () {
           circleAtom.style.transform = 'scale(1.12)';
           circleAtom.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease';
-          circleAtom.style.boxShadow = '0 0 0 3px rgba(134, 103, 57, 0.45)';
+          circleAtom.style.boxShadow = isDolce 
+            ? '0 0 0 3px rgba(126, 187, 250, 0.5)'
+            : '0 0 0 3px rgba(134, 103, 57, 0.45)';
         });
 
         circleAtom.addEventListener('mouseleave', function () {
@@ -1056,7 +1125,9 @@
     // 8c. UPDATE DRESS CODE COLOR PALETTE
     var palette = (data.colorPalette && Array.isArray(data.colorPalette)) ? data.colorPalette : null;
     if (palette) {
-      BLOSSOM_OUD_PALETTE_SELECTORS.forEach(function (sel, idx) {
+      var isDolce = !!document.querySelector('[data-elem-id="1741430557591"]');
+      var activeSelectors = isDolce ? DOLCE_VITA_PALETTE_SELECTORS : BLOSSOM_OUD_PALETTE_SELECTORS;
+      activeSelectors.forEach(function (sel, idx) {
         if (palette[idx]) {
           var circleAtom = document.querySelector(sel);
           if (circleAtom) {
@@ -1128,6 +1199,7 @@
         }
       });
     }
+    adjustDolceVitaDressCodeLayout();
 
     // 12. UPDATE GIFT PREFERENCE
     if (data.giftPreference) {
@@ -1377,11 +1449,13 @@
     discoverElements();
     loadSavedCustomization();
     setupInteractiveClicks();
+    adjustDolceVitaDressCodeLayout();
 
     [50, 150, 300, 600, 1200].forEach(function (delay) {
       setTimeout(function () {
         discoverElements();
         loadSavedCustomization();
+        adjustDolceVitaDressCodeLayout();
       }, delay);
     });
 
@@ -1403,5 +1477,10 @@
   window.addEventListener('load', function () {
     discoverElements();
     loadSavedCustomization();
+    adjustDolceVitaDressCodeLayout();
+  });
+
+  window.addEventListener('resize', function () {
+    adjustDolceVitaDressCodeLayout();
   });
 })();

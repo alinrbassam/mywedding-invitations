@@ -7,13 +7,24 @@ import {
   Languages, ExternalLink, Palette, Loader2 
 } from 'lucide-react';
 
-const PALETTE_PRESETS = [
+const BLOSSOM_OUD_PALETTES = [
   { name: '🌿 Desert Olive & Burgundy (Default)', colors: ['#60603b', '#360c1a', '#40312c', '#efdfcd'] },
   { name: '🌸 Blush & Terracotta', colors: ['#8c4f56', '#c47d6a', '#d9a58b', '#fae8df'] },
   { name: '👑 Royal Emerald & Gold', colors: ['#1b4332', '#2d6a4f', '#b89758', '#f8f5ee'] },
   { name: '🌊 Aegean Midnight', colors: ['#081c3b', '#1a365d', '#8b9bb4', '#f0f4f8'] },
   { name: '🌾 Warm Almond & Champagne', colors: ['#7a5c43', '#a48467', '#c9b097', '#fdfbf7'] }
 ];
+
+const DOLCE_VITA_PALETTES = [
+  { name: '🍋 Amalfi Pastel Coastal (Default)', colors: ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa'] },
+  { name: '☀️ Positano Sunset', colors: ['#ffedd5', '#fed7aa', '#fca5a5', '#f43f5e', '#881337'] },
+  { name: '🌊 Capri Azure & Lemon', colors: ['#fef08a', '#e0f2fe', '#7dd3fc', '#0284c7', '#0369a1'] },
+  { name: '🌿 Ravello Olive & Terracotta', colors: ['#fef3c7', '#fde68a', '#d97706', '#65a30d', '#365314'] },
+  { name: '🍷 Tuscan Garden & Chianti', colors: ['#fae8ff', '#f0abfc', '#c084fc', '#7c3aed', '#581c87'] },
+  { name: '👑 Royal Italian Gold & Navy', colors: ['#fef9c3', '#fde047', '#93c5fd', '#1d4ed8', '#1e1b4b'] }
+];
+
+const PALETTE_PRESETS = BLOSSOM_OUD_PALETTES;
 
 const PHOTO_PRESETS = [
   {
@@ -903,86 +914,102 @@ export function TemplateCustomizerDrawer({
             </div>
 
             {/* DRESS CODE COLOR PALETTE */}
-            <div className="pt-3 border-t border-slate-200">
-              <div className="flex items-center justify-between mb-1">
-                <label className="block font-bold text-slate-700 text-xs flex items-center gap-1.5">
-                  <Palette className="w-3.5 h-3.5 text-[#006989]" />
-                  <span>Dress Code Color Palette (4 Colors)</span>
-                </label>
-                <span className="text-[10px] text-slate-400 font-medium">Click to Pick Hue/RGB</span>
-              </div>
-              <p className="text-[10px] text-slate-500 mb-2.5">
-                Click any swatch below (or directly on the invitation card) to choose a color via Hue, RGB sliders, or eyedropper:
-              </p>
+            {(() => {
+              const isDolceVita = templateInfo?.id === 'dolce-vita' || templateInfo?.id === 'dolcevita' || (customData.colorPalette && customData.colorPalette.length === 5);
+              const palettePresets = isDolceVita ? DOLCE_VITA_PALETTES : BLOSSOM_OUD_PALETTES;
+              const defaultPal = isDolceVita 
+                ? ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa']
+                : ['#60603b', '#360c1a', '#40312c', '#efdfcd'];
+              const currentPalette = (customData.colorPalette && customData.colorPalette.length > 0)
+                ? customData.colorPalette
+                : defaultPal;
 
-              {/* 4 Swatches with native color picker & Hex input */}
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {(customData.colorPalette || ['#60603b', '#360c1a', '#40312c', '#efdfcd']).map((color, idx) => (
-                  <div key={idx} className="flex flex-col items-center bg-slate-50 p-2 rounded-xl border border-slate-200 hover:border-[#006989] transition-all">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                      Color {idx + 1}
+              return (
+                <div className="pt-3 border-t border-slate-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-bold text-slate-700 text-xs flex items-center gap-1.5">
+                      <Palette className="w-3.5 h-3.5 text-[#006989]" />
+                      <span>Dress Code Color Palette ({currentPalette.length} Colors)</span>
                     </label>
-                    <div 
-                      className="relative group cursor-pointer w-9 h-9 rounded-full shadow-xs border-2 border-white ring-1 ring-slate-300 flex items-center justify-center overflow-hidden hover:scale-110 transition-transform" 
-                      style={{ backgroundColor: color }}
-                    >
-                      <input
-                        type="color"
-                        value={color && color.startsWith('#') && (color.length === 7 || color.length === 4) ? (color.length === 4 ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}` : color) : '#60603b'}
-                        onChange={(e) => {
-                          const newPal = [...(customData.colorPalette || ['#60603b', '#360c1a', '#40312c', '#efdfcd'])];
-                          newPal[idx] = e.target.value;
-                          onChangeCustomData({ ...customData, colorPalette: newPal });
-                        }}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                        title={`Click to pick Color ${idx + 1} (Hue, RGB, Hex)`}
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      value={color}
-                      maxLength={7}
-                      onChange={(e) => {
-                        const newPal = [...(customData.colorPalette || ['#60603b', '#360c1a', '#40312c', '#efdfcd'])];
-                        newPal[idx] = e.target.value;
-                        onChangeCustomData({ ...customData, colorPalette: newPal });
-                      }}
-                      className="mt-1.5 w-full text-[10px] text-center font-mono font-bold text-slate-700 bg-white rounded border border-slate-200 py-0.5 uppercase outline-none focus:border-[#006989]"
-                    />
+                    <span className="text-[10px] text-slate-400 font-medium">Click to Pick Hue/RGB</span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-[10px] text-slate-500 mb-2.5">
+                    Click any swatch below (or directly on the invitation card) to choose a color via Hue, RGB sliders, or eyedropper:
+                  </p>
 
-              {/* Curated Preset Palettes */}
-              <div>
-                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1.5">
-                  1-Click Luxury Palette Presets
-                </span>
-                <div className="space-y-1.5">
-                  {PALETTE_PRESETS.map((preset, pIdx) => (
-                    <button
-                      key={pIdx}
-                      type="button"
-                      onClick={() => onChangeCustomData({ ...customData, colorPalette: [...preset.colors] })}
-                      className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200 hover:border-[#006989] hover:bg-slate-50 transition-all text-left group"
-                    >
-                      <span className="text-[11px] font-medium text-slate-700 group-hover:text-[#006989]">
-                        {preset.name}
-                      </span>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {preset.colors.map((c, cIdx) => (
-                          <span
-                            key={cIdx}
-                            className="w-4 h-4 rounded-full border border-white shadow-xs"
-                            style={{ backgroundColor: c }}
+                  {/* Dynamic Swatches with native color picker & Hex input */}
+                  <div 
+                    className="grid gap-1.5 sm:gap-2 mb-3"
+                    style={{ gridTemplateColumns: `repeat(${currentPalette.length}, minmax(0, 1fr))` }}
+                  >
+                    {currentPalette.map((color, idx) => (
+                      <div key={idx} className="flex flex-col items-center bg-slate-50 p-1.5 sm:p-2 rounded-xl border border-slate-200 hover:border-[#006989] transition-all">
+                        <label className="text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 truncate w-full text-center">
+                          {currentPalette.length > 4 ? `C${idx + 1}` : `Color ${idx + 1}`}
+                        </label>
+                        <div 
+                          className="relative group cursor-pointer w-7 h-7 sm:w-8 sm:h-8 rounded-full shadow-xs border-2 border-white ring-1 ring-slate-300 flex items-center justify-center overflow-hidden hover:scale-110 transition-transform shrink-0" 
+                          style={{ backgroundColor: color }}
+                        >
+                          <input
+                            type="color"
+                            value={color && color.startsWith('#') && (color.length === 7 || color.length === 4) ? (color.length === 4 ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}` : color) : (defaultPal[idx] || '#60603b')}
+                            onChange={(e) => {
+                              const newPal = [...currentPalette];
+                              newPal[idx] = e.target.value;
+                              onChangeCustomData({ ...customData, colorPalette: newPal });
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            title={`Click to pick Color ${idx + 1} (Hue, RGB, Hex)`}
                           />
-                        ))}
+                        </div>
+                        <input
+                          type="text"
+                          value={color}
+                          maxLength={7}
+                          onChange={(e) => {
+                            const newPal = [...currentPalette];
+                            newPal[idx] = e.target.value;
+                            onChangeCustomData({ ...customData, colorPalette: newPal });
+                          }}
+                          className="mt-1.5 w-full text-[8px] sm:text-[10px] text-center font-mono font-bold text-slate-700 bg-white rounded border border-slate-200 py-0.5 uppercase outline-none focus:border-[#006989]"
+                        />
                       </div>
-                    </button>
-                  ))}
+                    ))}
+                  </div>
+
+                  {/* Curated Preset Palettes */}
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1.5">
+                      1-Click Luxury Palette Presets
+                    </span>
+                    <div className="space-y-1.5">
+                      {palettePresets.map((preset, pIdx) => (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, colorPalette: [...preset.colors] })}
+                          className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200 hover:border-[#006989] hover:bg-slate-50 transition-all text-left group"
+                        >
+                          <span className="text-[11px] font-medium text-slate-700 group-hover:text-[#006989] truncate pr-2">
+                            {preset.name}
+                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {preset.colors.map((c, cIdx) => (
+                              <span
+                                key={cIdx}
+                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border border-white shadow-xs"
+                                style={{ backgroundColor: c }}
+                              />
+                            ))}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
         )}
 
