@@ -87,6 +87,27 @@ const GALLERY_PRESETS = [
   }
 ];
 
+const DOLCE_VITA_DEFAULT_BOTTOM_PHOTO = 'https://static.tildacdn.net/tild3965-6266-4165-b837-303236623330/elegant-couple-love-.jpg';
+
+const BOTTOM_PHOTO_PRESETS = [
+  {
+    name: 'Romantic Coast (Default)',
+    url: DOLCE_VITA_DEFAULT_BOTTOM_PHOTO
+  },
+  {
+    name: 'Beach Sunset Embrace',
+    url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Classic Black Tie',
+    url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Italian Villa Garden',
+    url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80'
+  }
+];
+
 export function TemplateCustomizerDrawer({ 
   isOpen, 
   onClose, 
@@ -113,6 +134,7 @@ export function TemplateCustomizerDrawer({
   const fileInputRef = useRef(null);
   const galleryAddInputRef = useRef(null);
   const galleryReplaceInputRef = useRef(null);
+  const bottomPhotoInputRef = useRef(null);
   const [replacingGalleryIdx, setReplacingGalleryIdx] = useState(null);
   const [isResolvingMap, setIsResolvingMap] = useState(false);
   const [mapResolvedMsg, setMapResolvedMsg] = useState('');
@@ -222,6 +244,21 @@ export function TemplateCustomizerDrawer({
     const currentList = customData.galleryPhotos ? [...customData.galleryPhotos] : [...DOLCE_VITA_DEFAULT_GALLERY];
     currentList.splice(idx, 1);
     onChangeCustomData({ ...customData, galleryPhotos: currentList });
+  };
+
+  const handleBottomPhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        onChangeCustomData({ ...customData, bottomPhotoUrl: dataUrl });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const tabs = [
@@ -1054,6 +1091,156 @@ export function TemplateCustomizerDrawer({
                           </div>
                           <span className="text-[11px] font-semibold text-[#006989] hover:underline">
                             Apply
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: BOTTOM PHOTO (Dolce Vita) */}
+              {isDolceVita && (
+                <div className="space-y-3 pt-3 border-t border-slate-200">
+                  <input
+                    ref={bottomPhotoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBottomPhotoUpload}
+                    className="hidden"
+                  />
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs uppercase tracking-wider text-slate-800 font-bold">
+                          Bottom Photo
+                        </span>
+                        {customData.bottomPhotoUrl && (
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Check className="w-2.5 h-2.5" /> Active
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        Romantic photo placed at the bottom of the invitation
+                      </span>
+                    </div>
+
+                    {customData.bottomPhotoUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => bottomPhotoInputRef.current?.click()}
+                        className="px-2.5 py-1.5 bg-[#006989] hover:bg-[#005570] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all shrink-0"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Replace</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => bottomPhotoInputRef.current?.click()}
+                        className="px-2.5 py-1.5 bg-[#006989] hover:bg-[#005570] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all shrink-0"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Photo</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Upload or Active Bottom Photo Card */}
+                  {customData.bottomPhotoUrl ? (
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <img
+                          src={customData.bottomPhotoUrl}
+                          alt="Bottom Couple Photo"
+                          className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0 shadow-xs"
+                        />
+                        <div className="overflow-hidden">
+                          <span className="font-bold text-slate-800 text-xs block truncate">
+                            Bottom Photo Active
+                          </span>
+                          <span className="text-[11px] text-slate-500 block">
+                            Displayed under &ldquo;Hope to see you there!&rdquo;
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => bottomPhotoInputRef.current?.click()}
+                          className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                          title="Replace bottom photo"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 text-[#006989]" />
+                          <span>Replace</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, bottomPhotoUrl: '' })}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                          title="Remove bottom photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      onClick={() => bottomPhotoInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 hover:border-[#006989] rounded-2xl p-4 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-2 group"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-500 group-hover:text-[#006989] transition-colors">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-xs">
+                          Click to Upload Bottom Photo
+                        </p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">
+                          PNG, JPG or WEBP (Displays with luxury gradient fade)
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sample Bottom Photo Presets */}
+                  <div className="pt-1">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-bold text-slate-600 block">
+                        Or Sample Couple Looks:
+                      </span>
+                      {customData.bottomPhotoUrl !== DOLCE_VITA_DEFAULT_BOTTOM_PHOTO && (
+                        <button
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, bottomPhotoUrl: DOLCE_VITA_DEFAULT_BOTTOM_PHOTO })}
+                          className="text-[10px] text-[#006989] hover:underline font-semibold"
+                        >
+                          Restore Original
+                        </button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {BOTTOM_PHOTO_PRESETS.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, bottomPhotoUrl: preset.url })}
+                          className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all text-left ${
+                            customData.bottomPhotoUrl === preset.url
+                              ? 'border-[#006989] bg-[#006989]/5 ring-1 ring-[#006989]'
+                              : 'border-slate-200 hover:border-[#006989] bg-white'
+                          }`}
+                        >
+                          <img
+                            src={preset.url}
+                            alt={preset.name}
+                            className="w-8 h-8 rounded-lg object-cover shrink-0"
+                          />
+                          <span className="text-[11px] font-medium text-slate-700 truncate">
+                            {preset.name}
                           </span>
                         </button>
                       ))}

@@ -155,6 +155,7 @@ const DEFAULT_TEMPLATE_DATA = {
     mapUrl: 'https://maps.google.com/?q=Villa+Cimbrone+Ravello+Italy',
     colorPalette: ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa'],
     photoUrl: '',
+    bottomPhotoUrl: 'https://static.tildacdn.net/tild3965-6266-4165-b837-303236623330/elegant-couple-love-.jpg',
     galleryPhotos: [
       'https://static.tildacdn.net/tild3636-6361-4930-b032-303334643635/fe849b681b9cfddb0d3b.png',
       'https://static.tildacdn.net/tild6534-6461-4737-a535-383131303433/929df5d91510928224dc.png',
@@ -193,6 +194,7 @@ const DEFAULT_TEMPLATE_DATA = {
     mapUrl: 'https://maps.google.com/?q=Villa+Cimbrone+Ravello+Italy',
     colorPalette: ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa'],
     photoUrl: '',
+    bottomPhotoUrl: 'https://static.tildacdn.net/tild3965-6266-4165-b837-303236623330/elegant-couple-love-.jpg',
     galleryPhotos: [
       'https://static.tildacdn.net/tild3636-6361-4930-b032-303334643635/fe849b681b9cfddb0d3b.png',
       'https://static.tildacdn.net/tild6534-6461-4737-a535-383131303433/929df5d91510928224dc.png',
@@ -504,23 +506,23 @@ export function InvitationTemplateView({
     const data = initialCustomData ? { ...initialCustomData } : { ...baseDefaults };
     if (templateId === 'dolce-vita' || templateId === 'dolcevita') {
       data.photoUrl = '';
+      if (!data.bottomPhotoUrl && baseDefaults.bottomPhotoUrl) {
+        data.bottomPhotoUrl = baseDefaults.bottomPhotoUrl;
+      }
     }
     return data;
   });
 
   // Keep custom data in sync when switching templates
   useEffect(() => {
-    if (templateId === 'dolce-vita' || templateId === 'dolcevita') {
-      try {
-        localStorage.removeItem('wbg_custom_dolcevita');
-        sessionStorage.removeItem('wbg_custom_dolcevita');
-      } catch (e) {}
-    }
     if (!initialCustomData) {
       const newDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['blossom-oud'];
       const sanitized = { ...newDefaults };
       if (templateId === 'dolce-vita' || templateId === 'dolcevita') {
         sanitized.photoUrl = '';
+        if (!sanitized.bottomPhotoUrl && newDefaults.bottomPhotoUrl) {
+          sanitized.bottomPhotoUrl = newDefaults.bottomPhotoUrl;
+        }
       }
       setCustomData(sanitized);
     }
@@ -633,7 +635,13 @@ export function InvitationTemplateView({
       } else if (e.data.type === 'WBG_FIELD_CLICKED') {
         setIsCustomizerOpen(true);
         if (e.data.field) {
-          setCustomizerTab(e.data.field === 'palette' ? 'details' : e.data.field);
+          if (e.data.field === 'palette') {
+            setCustomizerTab('details');
+          } else if (e.data.field === 'bottomPhoto' || e.data.field === 'photo') {
+            setCustomizerTab('photo');
+          } else {
+            setCustomizerTab(e.data.field);
+          }
         }
       } else if (e.data.type === 'WBG_INLINE_EDIT') {
         if (e.data.text !== undefined) {

@@ -194,6 +194,7 @@
     dressCodeNodes: [],
     giftNodes: [],
     photoNodes: [],
+    bottomPhotoNode: null,
     countdown: {},
     dolceVitaTiles: {}
   };
@@ -238,6 +239,7 @@
     tracked.dressCodeNodes = [];
     tracked.giftNodes = [];
     tracked.photoNodes = [];
+    tracked.bottomPhotoNode = null;
     tracked.countdown = {};
     tracked.dolceVitaTiles = {};
 
@@ -518,6 +520,26 @@
         return !isIcon && !isEnvelope && !isCarouselOrVenue && (img.closest('.pl-img') || width > 180 || height > 180);
       });
       tracked.photoNodes = coupleImgs;
+    }
+
+    // 4b. Bottom photo element (Dolce Vita)
+    var bottomPhotoAtom = document.querySelector("#rec2442651163 [data-elem-id='1776926930895000002'] .tn-atom") ||
+                          document.querySelector("[data-elem-id='1776926930895000002'] .tn-atom");
+    if (bottomPhotoAtom) {
+      tracked.bottomPhotoNode = bottomPhotoAtom;
+      tagRole(bottomPhotoAtom, 'bottomPhoto');
+      var parentElem = bottomPhotoAtom.closest('.tn-elem') || bottomPhotoAtom;
+      parentElem.style.cursor = 'pointer';
+      parentElem.setAttribute('title', 'Click to edit Bottom Photo');
+      if (!parentElem.__wbg_clickBound) {
+        parentElem.__wbg_clickBound = true;
+        parentElem.addEventListener('click', function (e) {
+          e.stopPropagation();
+          try {
+            window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'bottomPhoto' }, '*');
+          } catch (err) {}
+        });
+      }
     }
   }
 
@@ -1309,6 +1331,46 @@
       }
     }
 
+    // 9c. UPDATE BOTTOM PHOTO (Dolce Vita)
+    if (data.bottomPhotoUrl !== undefined) {
+      var bottomAtom = tracked.bottomPhotoNode ||
+                       document.querySelector("#rec2442651163 [data-elem-id='1776926930895000002'] .tn-atom") ||
+                       document.querySelector("[data-elem-id='1776926930895000002'] .tn-atom");
+      var bottomContainer = document.querySelector("#rec2442651163 [data-elem-id='1776926930895000002']") ||
+                            document.querySelector("[data-elem-id='1776926930895000002']");
+      var gradientOverlay = document.querySelector("#rec2442651163 [data-elem-id='1776926930895000003']") ||
+                            document.querySelector("[data-elem-id='1776926930895000003']");
+      var bottomArtboard = document.querySelector("#rec2442651163 .t396__artboard");
+
+      if (data.bottomPhotoUrl) {
+        if (bottomAtom) {
+          bottomAtom.style.setProperty('background-image', 'url("' + data.bottomPhotoUrl + '")', 'important');
+          bottomAtom.style.setProperty('background-size', 'cover', 'important');
+          bottomAtom.style.setProperty('background-position', 'center center', 'important');
+          bottomAtom.setAttribute('data-original', data.bottomPhotoUrl);
+        }
+        if (bottomContainer) {
+          bottomContainer.style.setProperty('display', '', 'important');
+        }
+        if (gradientOverlay) {
+          gradientOverlay.style.setProperty('display', '', 'important');
+        }
+        if (bottomArtboard) {
+          bottomArtboard.style.setProperty('height', '669px', 'important');
+        }
+      } else {
+        if (bottomContainer) {
+          bottomContainer.style.setProperty('display', 'none', 'important');
+        }
+        if (gradientOverlay) {
+          gradientOverlay.style.setProperty('display', 'none', 'important');
+        }
+        if (bottomArtboard) {
+          bottomArtboard.style.setProperty('height', '230px', 'important');
+        }
+      }
+    }
+
     // 10. UPDATE WELCOME MESSAGE
     if (data.welcomeMessage) {
       var tgWelcome = document.querySelector("[field='tn_text_1782990616505000011']");
@@ -1539,7 +1601,7 @@
       }
       if (dolceCouple) {
         try {
-          window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'photo', couplePhoto: true }, '*');
+          window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'bottomPhoto', couplePhoto: true }, '*');
         } catch (err) {}
         return;
       }
