@@ -85,6 +85,8 @@ const DEFAULT_TEMPLATE_DATA = {
     venueName: 'Beldi Country Club',
     venueAddress: 'Km 6 Route du Barrage, Marrakech 40000, Morocco',
     mapUrl: 'https://maps.google.com/?q=Beldi+Country+Club+Marrakech',
+    mapEmbedUrl: '',
+    colorPalette: ['#60603b', '#360c1a', '#40312c', '#efdfcd'],
     photoUrl: '',
     welcomeMessage: 'Together with our families, we request the honour of your presence to celebrate our wedding.',
     dressCode: 'Formal Evening / Traditional Elegant Attire.',
@@ -120,6 +122,8 @@ const DEFAULT_TEMPLATE_DATA = {
     venueName: 'Beldi Country Club',
     venueAddress: 'Km 6 Route du Barrage, Marrakech 40000, Morocco',
     mapUrl: 'https://maps.google.com/?q=Beldi+Country+Club+Marrakech',
+    mapEmbedUrl: '',
+    colorPalette: ['#60603b', '#360c1a', '#40312c', '#efdfcd'],
     photoUrl: '',
     welcomeMessage: 'Together with our families, we request the honour of your presence to celebrate our wedding.',
     dressCode: 'Formal Evening / Traditional Elegant Attire.',
@@ -577,10 +581,19 @@ export function InvitationTemplateView({
       if (!e.data || typeof e.data !== 'object') return;
       if (e.data.type === 'WBG_BRIDGE_READY') {
         broadcastCustomization(customData);
+      } else if (e.data.type === 'WBG_UPDATE_PALETTE_COLOR') {
+        const { index, color } = e.data;
+        if (typeof index === 'number' && color) {
+          setCustomData(prev => {
+            const pal = prev.colorPalette ? [...prev.colorPalette] : ['#60603b', '#360c1a', '#40312c', '#efdfcd'];
+            pal[index] = color;
+            return { ...prev, colorPalette: pal };
+          });
+        }
       } else if (e.data.type === 'WBG_FIELD_CLICKED') {
         setIsCustomizerOpen(true);
         if (e.data.field) {
-          setCustomizerTab(e.data.field);
+          setCustomizerTab(e.data.field === 'palette' ? 'details' : e.data.field);
         }
       } else if (e.data.type === 'WBG_INLINE_EDIT') {
         if (e.data.text !== undefined) {

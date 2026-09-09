@@ -257,7 +257,6 @@
     var connSelectors = [
       SPECIFIC_SELECTORS.timelessGraceConnector,
       SPECIFIC_SELECTORS.sacredGardenConnector,
-      SPECIFIC_SELECTORS.blossomOudConnector,
       SPECIFIC_SELECTORS.vibrantVowsConnector
     ];
     connSelectors.forEach(function (sel) {
@@ -268,6 +267,13 @@
         }
       });
     });
+
+    // In Blossom & Oud, hide the standalone connector atom to prevent duplicate connectors
+    var boConnector = document.querySelector(SPECIFIC_SELECTORS.blossomOudConnector);
+    if (boConnector) {
+      var boParent = boConnector.closest('.tn-elem') || boConnector;
+      boParent.style.setProperty('display', 'none', 'important');
+    }
 
     // Multiline couple elements
     var multilineSelectors = [
@@ -670,6 +676,108 @@
     });
   }
 
+  // Dress Code Palette Selectors for Blossom & Oud
+  var BLOSSOM_OUD_PALETTE_SELECTORS = [
+    '[data-elem-id="1780767598424000008"] .tn-atom',
+    '[data-elem-id="1780767598425000011"] .tn-atom',
+    '[data-elem-id="1780767598425000014"] .tn-atom',
+    '[data-elem-id="1780767598425000017"] .tn-atom'
+  ];
+
+  function setupDressCodePaletteInteractivity(initialPalette) {
+    var palette = (Array.isArray(initialPalette) && initialPalette.length >= 4)
+      ? initialPalette.slice()
+      : ['#60603b', '#360c1a', '#40312c', '#efdfcd'];
+
+    // Force outer rings to be visible
+    var outerSelectors = [
+      '[data-elem-id="1780767598424000007"]',
+      '[data-elem-id="1780767598425000010"]',
+      '[data-elem-id="1780767598425000013"]',
+      '[data-elem-id="1780767598425000016"]'
+    ];
+    outerSelectors.forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (el) {
+        el.style.setProperty('opacity', '1', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+        el.classList.remove('t-animate_hidden');
+      }
+    });
+
+    BLOSSOM_OUD_PALETTE_SELECTORS.forEach(function (sel, idx) {
+      var circleAtom = document.querySelector(sel);
+      if (!circleAtom) return;
+
+      var parentElem = circleAtom.closest('.tn-elem') || circleAtom;
+      parentElem.style.setProperty('opacity', '1', 'important');
+      parentElem.style.setProperty('visibility', 'visible', 'important');
+      parentElem.classList.remove('t-animate_hidden');
+      circleAtom.style.setProperty('opacity', '1', 'important');
+      circleAtom.style.setProperty('visibility', 'visible', 'important');
+
+      parentElem.style.cursor = 'pointer';
+      parentElem.setAttribute('title', 'Click to change Color ' + (idx + 1));
+
+      var colorInput = circleAtom.querySelector('input[type="color"]');
+      if (!colorInput) {
+        colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.style.position = 'absolute';
+        colorInput.style.opacity = '0';
+        colorInput.style.pointerEvents = 'none';
+        colorInput.style.width = '1px';
+        colorInput.style.height = '1px';
+        circleAtom.appendChild(colorInput);
+
+        circleAtom.addEventListener('mouseenter', function () {
+          circleAtom.style.transform = 'scale(1.12)';
+          circleAtom.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease';
+          circleAtom.style.boxShadow = '0 0 0 3px rgba(134, 103, 57, 0.45)';
+        });
+
+        circleAtom.addEventListener('mouseleave', function () {
+          circleAtom.style.transform = 'scale(1)';
+          circleAtom.style.boxShadow = 'none';
+        });
+
+        circleAtom.addEventListener('click', function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          try {
+            window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'palette' }, '*');
+          } catch (err) {}
+          colorInput.click();
+        });
+
+        function handleColorChange(e) {
+          var newColor = e.target.value;
+          circleAtom.style.setProperty('background-color', newColor, 'important');
+          try {
+            window.parent.postMessage({
+              type: 'WBG_UPDATE_PALETTE_COLOR',
+              index: idx,
+              color: newColor
+            }, '*');
+          } catch (err) {}
+        }
+
+        colorInput.addEventListener('input', handleColorChange);
+        colorInput.addEventListener('change', handleColorChange);
+      }
+
+      if (palette[idx]) {
+        try {
+          if (palette[idx].startsWith('#') && (palette[idx].length === 7 || palette[idx].length === 4)) {
+            colorInput.value = palette[idx].length === 4 
+              ? ('#' + palette[idx][1] + palette[idx][1] + palette[idx][2] + palette[idx][2] + palette[idx][3] + palette[idx][3])
+              : palette[idx];
+          }
+        } catch (e) {}
+      }
+    });
+  }
+
   // Load and apply saved customization from sessionStorage / localStorage
   function loadSavedCustomization() {
     try {
@@ -747,6 +855,13 @@
       });
     }
 
+    // Always keep Blossom & Oud standalone connector hidden
+    var boConnEl = document.querySelector(SPECIFIC_SELECTORS.blossomOudConnector);
+    if (boConnEl) {
+      var boParentEl = boConnEl.closest('.tn-elem') || boConnEl;
+      boParentEl.style.setProperty('display', 'none', 'important');
+    }
+
     // 4. UPDATE MULTILINE COUPLE
     if (p1 || p2) {
       tracked.multilineCoupleNodes.forEach(function (node) {
@@ -758,8 +873,8 @@
           }
           if (p1 && p2) {
             node.innerHTML = 
-              '<div style="line-height: 1.12; margin-bottom: 6px; font-size: inherit; font-family: inherit;">' + p1 + '</div>' +
-              (conn && conn !== '&' ? '<div style="font-size: 24px; line-height: 1; margin: 2px 0 6px 0; opacity: 0.85;">' + conn + '</div>' : '') +
+              '<div style="line-height: 1.12; margin-bottom: 4px; font-size: inherit; font-family: inherit;">' + p1 + '</div>' +
+              (conn ? '<div style="font-size: 26px; line-height: 1; margin: 3px 0 5px 0; opacity: 0.85; font-family: inherit;">' + (conn === '&' ? '&amp;' : conn) + '</div>' : '') +
               '<div style="line-height: 1.12; font-size: inherit; font-family: inherit;">' + p2 + '</div>';
           } else {
             node.innerHTML = '<div style="line-height: 1.12;">' + (p1 || p2) + '</div>';
@@ -879,16 +994,35 @@
     }
 
     // 8b. UPDATE GOOGLE MAPS EMBED & DIRECTIONS LINK
-    var mapQuery = data.venueAddress || data.venueName || '';
-    var rawMapUrl = data.mapUrl || '';
+    var rawMapUrl = data.mapUrl ? String(data.mapUrl).trim() : '';
     var embedSrc = '';
 
-    if (rawMapUrl && rawMapUrl.includes('google.com/maps/embed')) {
+    // Priority 1: explicitly provided embed URL (e.g. from server resolver)
+    if (data.mapEmbedUrl) {
+      embedSrc = data.mapEmbedUrl;
+    } else if (rawMapUrl && rawMapUrl.includes('google.com/maps/embed')) {
       embedSrc = rawMapUrl;
-    } else if (mapQuery) {
-      embedSrc = 'https://maps.google.com/maps?q=' + encodeURIComponent(mapQuery) + '&output=embed';
     } else if (rawMapUrl) {
-      embedSrc = 'https://maps.google.com/maps?q=' + encodeURIComponent(rawMapUrl) + '&output=embed';
+      // Priority 2: Extract coordinates if present in URL
+      var coordMatch = rawMapUrl.match(/search\/(-?\d+\.\d+),\+?(-?\d+\.\d+)/) ||
+                       rawMapUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
+                       rawMapUrl.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (coordMatch) {
+        embedSrc = 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&output=embed';
+      } else {
+        var placeMatch = rawMapUrl.match(/\/place\/([^/@?]+)/);
+        if (placeMatch) {
+          try {
+            embedSrc = 'https://maps.google.com/maps?q=' + placeMatch[1] + '&output=embed';
+          } catch (e) {}
+        }
+      }
+    }
+
+    // Priority 3: Fall back to venue address or venue name
+    if (!embedSrc && (data.venueAddress || data.venueName)) {
+      var mapQuery = (data.venueAddress || data.venueName || '').trim();
+      embedSrc = 'https://maps.google.com/maps?q=' + encodeURIComponent(mapQuery) + '&output=embed';
     }
 
     if (embedSrc) {
@@ -901,11 +1035,12 @@
     }
 
     // Direction links on button & map
-    var directionsLink = rawMapUrl || (mapQuery ? ('https://maps.google.com/?q=' + encodeURIComponent(mapQuery)) : '');
+    var directionsLink = rawMapUrl || (data.venueAddress ? ('https://maps.google.com/?q=' + encodeURIComponent(data.venueAddress)) : '');
     if (directionsLink) {
       var mapHeaders = [
         document.querySelector(SPECIFIC_SELECTORS.blossomOudMapHeader),
-        document.querySelector("[data-elem-id='1710614957366']")
+        document.querySelector("[data-elem-id='1710614957366']"),
+        document.querySelector("[data-elem-id='1779544773135']")
       ];
       mapHeaders.forEach(function (el) {
         if (!el) return;
@@ -917,6 +1052,20 @@
         };
       });
     }
+
+    // 8c. UPDATE DRESS CODE COLOR PALETTE
+    var palette = (data.colorPalette && Array.isArray(data.colorPalette)) ? data.colorPalette : null;
+    if (palette) {
+      BLOSSOM_OUD_PALETTE_SELECTORS.forEach(function (sel, idx) {
+        if (palette[idx]) {
+          var circleAtom = document.querySelector(sel);
+          if (circleAtom) {
+            circleAtom.style.setProperty('background-color', palette[idx], 'important');
+          }
+        }
+      });
+    }
+    setupDressCodePaletteInteractivity(palette);
 
     // 9. UPDATE PHOTO
     if (data.photoUrl) {

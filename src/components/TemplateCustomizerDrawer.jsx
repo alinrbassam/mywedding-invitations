@@ -4,8 +4,16 @@ import {
   Sparkles, RotateCcw, Check, ShoppingBag, Upload, 
   Trash2, Plus, Info, ChevronRight, RefreshCw,
   ChevronDown, ChevronUp, Eye, Maximize2, Minimize2,
-  Languages, ExternalLink 
+  Languages, ExternalLink, Palette, Loader2 
 } from 'lucide-react';
+
+const PALETTE_PRESETS = [
+  { name: '🌿 Desert Olive & Burgundy (Default)', colors: ['#60603b', '#360c1a', '#40312c', '#efdfcd'] },
+  { name: '🌸 Blush & Terracotta', colors: ['#8c4f56', '#c47d6a', '#d9a58b', '#fae8df'] },
+  { name: '👑 Royal Emerald & Gold', colors: ['#1b4332', '#2d6a4f', '#b89758', '#f8f5ee'] },
+  { name: '🌊 Aegean Midnight', colors: ['#081c3b', '#1a365d', '#8b9bb4', '#f0f4f8'] },
+  { name: '🌾 Warm Almond & Champagne', colors: ['#7a5c43', '#a48467', '#c9b097', '#fdfbf7'] }
+];
 
 const PHOTO_PRESETS = [
   {
@@ -50,6 +58,50 @@ export function TemplateCustomizerDrawer({
   const sheetMode = onMobileSheetModeChange ? mobileSheetMode : localSheetMode;
   const setSheetMode = onMobileSheetModeChange || setLocalSheetMode;
   const fileInputRef = useRef(null);
+  const [isResolvingMap, setIsResolvingMap] = useState(false);
+  const [mapResolvedMsg, setMapResolvedMsg] = useState('');
+
+  const handleMapUrlChange = async (url) => {
+    const trimmed = url.trim();
+    const updated = { ...customData, mapUrl: trimmed };
+
+    if (trimmed.includes('maps.app.goo.gl') || trimmed.includes('goo.gl/maps')) {
+      setIsResolvingMap(true);
+      setMapResolvedMsg('Resolving location pin...');
+      onChangeCustomData(updated);
+      try {
+        const res = await fetch(`/api/resolve-maps-url?url=${encodeURIComponent(trimmed)}`);
+        const json = await res.json();
+        if (json.success && json.embedUrl) {
+          onChangeCustomData({
+            ...updated,
+            mapEmbedUrl: json.embedUrl,
+            venueCoords: json.lat && json.lng ? `${json.lat}, ${json.lng}` : undefined
+          });
+          setMapResolvedMsg(json.lat && json.lng ? `✓ Pinned to ${json.lat}, ${json.lng}` : '✓ Map pin updated');
+        } else {
+          setMapResolvedMsg('');
+        }
+      } catch (err) {
+        setMapResolvedMsg('');
+      } finally {
+        setIsResolvingMap(false);
+        setTimeout(() => setMapResolvedMsg(''), 5000);
+      }
+    } else {
+      const coordMatch = trimmed.match(/search\/(-?\d+\.\d+),\+?(-?\d+\.\d+)/) ||
+                         trimmed.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
+                         trimmed.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (coordMatch) {
+        updated.mapEmbedUrl = `https://maps.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&output=embed`;
+        setMapResolvedMsg(`✓ Pinned to ${coordMatch[1]}, ${coordMatch[2]}`);
+        setTimeout(() => setMapResolvedMsg(''), 5000);
+      } else {
+        updated.mapEmbedUrl = '';
+      }
+      onChangeCustomData(updated);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -418,13 +470,25 @@ export function TemplateCustomizerDrawer({
                   </a>
                 )}
               </div>
-              <input
-                type="text"
-                placeholder="https://maps.app.goo.gl/... or https://maps.google.com/..."
-                value={customData.mapUrl || ''}
-                onChange={(e) => onChangeCustomData({ ...customData, mapUrl: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#006989] outline-none text-xs"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="https://maps.app.goo.gl/... or https://maps.google.com/..."
+                  value={customData.mapUrl || ''}
+                  onChange={(e) => handleMapUrlChange(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#006989] outline-none text-xs pr-8"
+                />
+                {isResolvingMap && (
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#006989]" />
+                  </div>
+                )}
+              </div>
+              {mapResolvedMsg && (
+                <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                  <span>{mapResolvedMsg}</span>
+                </p>
+              )}
               <p className="text-[10px] text-slate-400 mt-1">
                 Paste any Google Maps link (e.g. <code>maps.app.goo.gl</code> or full link) — the template map and directions button update automatically!
               </p>
@@ -836,6 +900,88 @@ export function TemplateCustomizerDrawer({
                 onChange={(e) => onChangeCustomData({ ...customData, giftPreference: e.target.value })}
                 className="w-full p-2.5 rounded-xl border border-slate-300 focus:border-[#006989] outline-none text-xs"
               />
+            </div>
+
+            {/* DRESS CODE COLOR PALETTE */}
+            <div className="pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-700 text-xs flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-[#006989]" />
+                  <span>Dress Code Color Palette (4 Colors)</span>
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">Click to Pick Hue/RGB</span>
+              </div>
+              <p className="text-[10px] text-slate-500 mb-2.5">
+                Click any swatch below (or directly on the invitation card) to choose a color via Hue, RGB sliders, or eyedropper:
+              </p>
+
+              {/* 4 Swatches with native color picker & Hex input */}
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {(customData.colorPalette || ['#60603b', '#360c1a', '#40312c', '#efdfcd']).map((color, idx) => (
+                  <div key={idx} className="flex flex-col items-center bg-slate-50 p-2 rounded-xl border border-slate-200 hover:border-[#006989] transition-all">
+                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Color {idx + 1}
+                    </label>
+                    <div 
+                      className="relative group cursor-pointer w-9 h-9 rounded-full shadow-xs border-2 border-white ring-1 ring-slate-300 flex items-center justify-center overflow-hidden hover:scale-110 transition-transform" 
+                      style={{ backgroundColor: color }}
+                    >
+                      <input
+                        type="color"
+                        value={color && color.startsWith('#') && (color.length === 7 || color.length === 4) ? (color.length === 4 ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}` : color) : '#60603b'}
+                        onChange={(e) => {
+                          const newPal = [...(customData.colorPalette || ['#60603b', '#360c1a', '#40312c', '#efdfcd'])];
+                          newPal[idx] = e.target.value;
+                          onChangeCustomData({ ...customData, colorPalette: newPal });
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        title={`Click to pick Color ${idx + 1} (Hue, RGB, Hex)`}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={color}
+                      maxLength={7}
+                      onChange={(e) => {
+                        const newPal = [...(customData.colorPalette || ['#60603b', '#360c1a', '#40312c', '#efdfcd'])];
+                        newPal[idx] = e.target.value;
+                        onChangeCustomData({ ...customData, colorPalette: newPal });
+                      }}
+                      className="mt-1.5 w-full text-[10px] text-center font-mono font-bold text-slate-700 bg-white rounded border border-slate-200 py-0.5 uppercase outline-none focus:border-[#006989]"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Curated Preset Palettes */}
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1.5">
+                  1-Click Luxury Palette Presets
+                </span>
+                <div className="space-y-1.5">
+                  {PALETTE_PRESETS.map((preset, pIdx) => (
+                    <button
+                      key={pIdx}
+                      type="button"
+                      onClick={() => onChangeCustomData({ ...customData, colorPalette: [...preset.colors] })}
+                      className="w-full flex items-center justify-between p-2 rounded-xl border border-slate-200 hover:border-[#006989] hover:bg-slate-50 transition-all text-left group"
+                    >
+                      <span className="text-[11px] font-medium text-slate-700 group-hover:text-[#006989]">
+                        {preset.name}
+                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {preset.colors.map((c, cIdx) => (
+                          <span
+                            key={cIdx}
+                            className="w-4 h-4 rounded-full border border-white shadow-xs"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
