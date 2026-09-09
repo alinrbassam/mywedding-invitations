@@ -155,6 +155,18 @@ const DEFAULT_TEMPLATE_DATA = {
     mapUrl: 'https://maps.google.com/?q=Villa+Cimbrone+Ravello+Italy',
     colorPalette: ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa'],
     photoUrl: '',
+    galleryPhotos: [
+      'https://static.tildacdn.net/tild3636-6361-4930-b032-303334643635/fe849b681b9cfddb0d3b.png',
+      'https://static.tildacdn.net/tild6534-6461-4737-a535-383131303433/929df5d91510928224dc.png',
+      'https://static.tildacdn.net/tild6336-3439-4466-b332-383265633833/0b221d34a7bea5af08ac.jpg',
+      'https://static.tildacdn.net/tild3164-3730-4539-b833-356663306534/fe9b100e056d201daaa0.jpg',
+      'https://static.tildacdn.net/tild3765-6165-4631-a432-383936306336/1be83ec7c312b2e66a71.jpg',
+      'https://static.tildacdn.net/tild3739-3133-4436-b536-313739653132/cbd7efbf41ddb54271af.jpg',
+      'https://static.tildacdn.net/tild6562-3130-4965-b235-376232326561/61a01dd884f0c3b00bd5.jpg',
+      'https://static.tildacdn.net/tild3336-6363-4363-b462-306330343939/fd70c331309855caacec.jpg',
+      'https://static.tildacdn.net/tild3238-3063-4861-a134-626434323464/3f985b99d3bfbb52bbf7.jpg',
+      'https://static.tildacdn.net/tild3436-3931-4635-a665-333365626134/feb970b653de72df570f.jpg'
+    ],
     welcomeMessage: 'Together with our families, we request the pleasure of your company as we exchange our vows overlooking the Amalfi Coast.',
     dressCode: 'Black Tie Optional / Formal Italian Summer Attire.',
     giftPreference: 'Your presence is our present. A contribution to our honeymoon fund is warmly appreciated.',
@@ -181,6 +193,18 @@ const DEFAULT_TEMPLATE_DATA = {
     mapUrl: 'https://maps.google.com/?q=Villa+Cimbrone+Ravello+Italy',
     colorPalette: ['#faf1db', '#f5d9b1', '#f2cac9', '#afcff1', '#7ebbfa'],
     photoUrl: '',
+    galleryPhotos: [
+      'https://static.tildacdn.net/tild3636-6361-4930-b032-303334643635/fe849b681b9cfddb0d3b.png',
+      'https://static.tildacdn.net/tild6534-6461-4737-a535-383131303433/929df5d91510928224dc.png',
+      'https://static.tildacdn.net/tild6336-3439-4466-b332-383265633833/0b221d34a7bea5af08ac.jpg',
+      'https://static.tildacdn.net/tild3164-3730-4539-b833-356663306534/fe9b100e056d201daaa0.jpg',
+      'https://static.tildacdn.net/tild3765-6165-4631-a432-383936306336/1be83ec7c312b2e66a71.jpg',
+      'https://static.tildacdn.net/tild3739-3133-4436-b536-313739653132/cbd7efbf41ddb54271af.jpg',
+      'https://static.tildacdn.net/tild6562-3130-4965-b235-376232326561/61a01dd884f0c3b00bd5.jpg',
+      'https://static.tildacdn.net/tild3336-6363-4363-b462-306330343939/fd70c331309855caacec.jpg',
+      'https://static.tildacdn.net/tild3238-3063-4861-a134-626434323464/3f985b99d3bfbb52bbf7.jpg',
+      'https://static.tildacdn.net/tild3436-3931-4635-a665-333365626134/feb970b653de72df570f.jpg'
+    ],
     welcomeMessage: 'Together with our families, we request the pleasure of your company as we exchange our vows overlooking the Amalfi Coast.',
     dressCode: 'Black Tie Optional / Formal Italian Summer Attire.',
     giftPreference: 'Your presence is our present. A contribution to our honeymoon fund is warmly appreciated.',
@@ -477,14 +501,28 @@ export function InvitationTemplateView({
   // Initialize custom data
   const baseDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['blossom-oud'];
   const [customData, setCustomData] = useState(() => {
-    return initialCustomData || { ...baseDefaults };
+    const data = initialCustomData ? { ...initialCustomData } : { ...baseDefaults };
+    if (templateId === 'dolce-vita' || templateId === 'dolcevita') {
+      data.photoUrl = '';
+    }
+    return data;
   });
 
   // Keep custom data in sync when switching templates
   useEffect(() => {
+    if (templateId === 'dolce-vita' || templateId === 'dolcevita') {
+      try {
+        localStorage.removeItem('wbg_custom_dolcevita');
+        sessionStorage.removeItem('wbg_custom_dolcevita');
+      } catch (e) {}
+    }
     if (!initialCustomData) {
       const newDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['blossom-oud'];
-      setCustomData({ ...newDefaults });
+      const sanitized = { ...newDefaults };
+      if (templateId === 'dolce-vita' || templateId === 'dolcevita') {
+        sanitized.photoUrl = '';
+      }
+      setCustomData(sanitized);
     }
   }, [templateId, initialCustomData]);
 

@@ -45,6 +45,48 @@ const PHOTO_PRESETS = [
   }
 ];
 
+const DOLCE_VITA_DEFAULT_GALLERY = [
+  'https://static.tildacdn.net/tild3636-6361-4930-b032-303334643635/fe849b681b9cfddb0d3b.png',
+  'https://static.tildacdn.net/tild6534-6461-4737-a535-383131303433/929df5d91510928224dc.png',
+  'https://static.tildacdn.net/tild6336-3439-4466-b332-383265633833/0b221d34a7bea5af08ac.jpg',
+  'https://static.tildacdn.net/tild3164-3730-4539-b833-356663306534/fe9b100e056d201daaa0.jpg',
+  'https://static.tildacdn.net/tild3765-6165-4631-a432-383936306336/1be83ec7c312b2e66a71.jpg',
+  'https://static.tildacdn.net/tild3739-3133-4436-b536-313739653132/cbd7efbf41ddb54271af.jpg',
+  'https://static.tildacdn.net/tild6562-3130-4965-b235-376232326561/61a01dd884f0c3b00bd5.jpg',
+  'https://static.tildacdn.net/tild3336-6363-4363-b462-306330343939/fd70c331309855caacec.jpg',
+  'https://static.tildacdn.net/tild3238-3063-4861-a134-626434323464/3f985b99d3bfbb52bbf7.jpg',
+  'https://static.tildacdn.net/tild3436-3931-4635-a665-333365626134/feb970b653de72df570f.jpg'
+];
+
+const GALLERY_PRESETS = [
+  {
+    name: '🍋 Italian Riviera (Default)',
+    desc: 'Original 10 summer chic coastal outfits',
+    photos: DOLCE_VITA_DEFAULT_GALLERY
+  },
+  {
+    name: '🌊 Mediterranean Coastal Pastels',
+    desc: 'Soft pastels & seaside linens',
+    photos: [
+      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=800&q=80'
+    ]
+  },
+  {
+    name: '🎩 Formal Black Tie & Evening',
+    desc: 'Midnight tuxedos & elegant gowns',
+    photos: [
+      'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80'
+    ]
+  }
+];
+
 export function TemplateCustomizerDrawer({ 
   isOpen, 
   onClose, 
@@ -69,6 +111,9 @@ export function TemplateCustomizerDrawer({
   const sheetMode = onMobileSheetModeChange ? mobileSheetMode : localSheetMode;
   const setSheetMode = onMobileSheetModeChange || setLocalSheetMode;
   const fileInputRef = useRef(null);
+  const galleryAddInputRef = useRef(null);
+  const galleryReplaceInputRef = useRef(null);
+  const [replacingGalleryIdx, setReplacingGalleryIdx] = useState(null);
   const [isResolvingMap, setIsResolvingMap] = useState(false);
   const [mapResolvedMsg, setMapResolvedMsg] = useState('');
 
@@ -128,6 +173,55 @@ export function TemplateCustomizerDrawer({
       }
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleGalleryAdd = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        const currentList = customData.galleryPhotos ? [...customData.galleryPhotos] : [...DOLCE_VITA_DEFAULT_GALLERY];
+        currentList.push(dataUrl);
+        onChangeCustomData({ ...customData, galleryPhotos: currentList });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const triggerGalleryReplace = (idx) => {
+    setReplacingGalleryIdx(idx);
+    if (galleryReplaceInputRef.current) {
+      galleryReplaceInputRef.current.value = '';
+      galleryReplaceInputRef.current.click();
+    }
+  };
+
+  const handleGalleryReplace = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || replacingGalleryIdx === null) return;
+    const targetIdx = replacingGalleryIdx;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        const currentList = customData.galleryPhotos ? [...customData.galleryPhotos] : [...DOLCE_VITA_DEFAULT_GALLERY];
+        currentList[targetIdx] = dataUrl;
+        onChangeCustomData({ ...customData, galleryPhotos: currentList });
+      }
+      setReplacingGalleryIdx(null);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleRemoveGalleryPhoto = (idx) => {
+    const currentList = customData.galleryPhotos ? [...customData.galleryPhotos] : [...DOLCE_VITA_DEFAULT_GALLERY];
+    currentList.splice(idx, 1);
+    onChangeCustomData({ ...customData, galleryPhotos: currentList });
   };
 
   const tabs = [
@@ -701,96 +795,275 @@ export function TemplateCustomizerDrawer({
           </div>
         )}
 
-        {/* TAB 4: COUPLE PHOTOS */}
-        {activeTab === 'photo' && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 text-[11px] text-emerald-900 flex items-start gap-2">
-              <Camera className="w-4 h-4 shrink-0 text-emerald-700 mt-0.5" />
-              <span>
-                Upload your favourite photo to preview how you will look inside the invitation frame!
-              </span>
-            </div>
+        {/* TAB 4: PHOTOS & GALLERY */}
+        {activeTab === 'photo' && (() => {
+          const isDolceVita = templateInfo?.id === 'dolce-vita' || templateInfo?.id === 'dolcevita' || (customData.colorPalette && customData.colorPalette.length === 5);
+          const hasGallery = isDolceVita || (customData.galleryPhotos && customData.galleryPhotos.length > 0);
+          const activeGallery = customData.galleryPhotos || (isDolceVita ? DOLCE_VITA_DEFAULT_GALLERY : []);
 
-            {/* Custom Photo Upload Area */}
-            <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 hover:border-[#006989] rounded-2xl p-4 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-2 group"
-            >
+          return (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Hidden file inputs for gallery actions */}
               <input
-                ref={fileInputRef}
+                ref={galleryAddInputRef}
                 type="file"
                 accept="image/*"
-                onChange={handleFileUpload}
+                onChange={handleGalleryAdd}
                 className="hidden"
               />
-              <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-500 group-hover:text-[#006989] transition-colors">
-                <Upload className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="font-bold text-slate-800 text-xs">
-                  Click to Upload Your Photo
-                </p>
-                <p className="text-[10px] text-slate-500 mt-0.5">
-                  PNG, JPG or WEBP (High resolution recommended)
-                </p>
-              </div>
-            </div>
+              <input
+                ref={galleryReplaceInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleGalleryReplace}
+                className="hidden"
+              />
 
-            {/* If Photo Uploaded: Active Preview & Clear */}
-            {customData.photoUrl && (
-              <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                  <img
-                    src={customData.photoUrl}
-                    alt="Uploaded Couple"
-                    className="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0"
-                  />
-                  <div className="overflow-hidden">
-                    <span className="font-bold text-slate-800 text-xs block truncate">
-                      Custom Photo Active
-                    </span>
-                    <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Showing in template
+              {/* NON-DOLCE VITA: SINGLE COUPLE PORTRAIT SECTION */}
+              {!isDolceVita && (
+                <div className="space-y-3">
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200/80 text-[11px] text-emerald-900 flex items-start gap-2">
+                    <Camera className="w-4 h-4 shrink-0 text-emerald-700 mt-0.5" />
+                    <span>
+                      Upload your favourite photo to preview how you will look inside the invitation frame!
                     </span>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => onChangeCustomData({ ...customData, photoUrl: '' })}
-                  className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                  title="Remove custom photo"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs uppercase tracking-wider text-slate-700 font-bold block">
+                        Main Couple Portrait
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        Featured in the invitation
+                      </span>
+                    </div>
+                    {customData.photoUrl && (
+                      <span className="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Active
+                      </span>
+                    )}
+                  </div>
 
-            {/* Inspiration Presets */}
-            <div className="pt-2">
-              <span className="text-[11px] font-bold text-slate-700 block mb-2">
-                Or Try Sample Aesthetic Presets:
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                {PHOTO_PRESETS.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => onChangeCustomData({ ...customData, photoUrl: preset.url })}
-                    className="flex items-center gap-2 p-1.5 rounded-xl border border-slate-200 hover:border-[#006989] bg-white transition-all text-left"
-                  >
-                    <img
-                      src={preset.url}
-                      alt={preset.name}
-                      className="w-8 h-8 rounded-lg object-cover shrink-0"
-                    />
-                    <span className="text-[11px] font-medium text-slate-700 truncate">
-                      {preset.name}
+                  {/* Upload or Active Couple Photo Card */}
+                  {customData.photoUrl ? (
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <img
+                          src={customData.photoUrl}
+                          alt="Couple Portrait"
+                          className="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0 shadow-xs"
+                        />
+                        <div className="overflow-hidden">
+                          <span className="font-bold text-slate-800 text-xs block truncate">
+                            Couple Portrait Active
+                          </span>
+                          <span className="text-[11px] text-slate-500 block truncate">
+                            Click replace to choose another
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                          title="Replace couple photo"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 text-[#006989]" />
+                          <span>Replace</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, photoUrl: '' })}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                          title="Remove couple photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 hover:border-[#006989] rounded-2xl p-4 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-2 group"
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-500 group-hover:text-[#006989] transition-colors">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-xs">
+                          Click to Upload Couple Portrait
+                        </p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">
+                          PNG, JPG or WEBP (High resolution recommended)
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sample Couple Presets */}
+                  <div className="pt-1">
+                    <span className="text-[11px] font-bold text-slate-600 block mb-1.5">
+                      Or Sample Portrait Looks:
                     </span>
-                  </button>
-                ))}
-              </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {PHOTO_PRESETS.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, photoUrl: preset.url })}
+                          className={`flex items-center gap-2 p-1.5 rounded-xl border transition-all text-left ${
+                            customData.photoUrl === preset.url
+                              ? 'border-[#006989] bg-[#006989]/5 ring-1 ring-[#006989]'
+                              : 'border-slate-200 hover:border-[#006989] bg-white'
+                          }`}
+                        >
+                          <img
+                            src={preset.url}
+                            alt={preset.name}
+                            className="w-8 h-8 rounded-lg object-cover shrink-0"
+                          />
+                          <span className="text-[11px] font-medium text-slate-700 truncate">
+                            {preset.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* DRESS CODE & GALLERY CAROUSEL SECTION */}
+              {hasGallery && (
+                <div className="space-y-4">
+                  <div className="p-3 bg-sky-50 rounded-xl border border-sky-200/80 text-[11px] text-sky-950 flex items-start gap-2">
+                    <Camera className="w-4 h-4 shrink-0 text-sky-700 mt-0.5" />
+                    <span>
+                      Guests can scroll left and right to view your photos! You can add new photos, replace any photo, or remove ones you don't need.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs uppercase tracking-wider text-slate-800 font-bold">
+                          Photo Gallery
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                          {activeGallery.length} {activeGallery.length === 1 ? 'photo' : 'photos'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        Scroll left and right in the invitation to view
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => galleryAddInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-[#006989] hover:bg-[#005570] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Photo</span>
+                    </button>
+                  </div>
+
+                  {/* Gallery Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {activeGallery.map((url, idx) => (
+                      <div
+                        key={idx}
+                        className="group relative bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-xs flex flex-col"
+                      >
+                        <div className="relative aspect-4/3 w-full bg-slate-200 overflow-hidden">
+                          <img
+                            src={url}
+                            alt={`Gallery item ${idx + 1}`}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                          <span className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-xs">
+                            #{idx + 1}
+                          </span>
+                        </div>
+
+                        {/* Card Actions: Replace & Remove */}
+                        <div className="flex items-center border-t border-slate-200 bg-white">
+                          <button
+                            type="button"
+                            onClick={() => triggerGalleryReplace(idx)}
+                            className="flex-1 py-1.5 px-2 text-[11px] font-semibold text-slate-700 hover:text-[#006989] hover:bg-slate-50 flex items-center justify-center gap-1 transition-colors border-r border-slate-100"
+                            title={`Replace photo #${idx + 1}`}
+                          >
+                            <RefreshCw className="w-3 h-3 text-[#006989]" />
+                            <span>Replace</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGalleryPhoto(idx)}
+                            className="p-1.5 px-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 flex items-center justify-center transition-colors"
+                            title={`Remove photo #${idx + 1}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Add Photo Tile */}
+                    <button
+                      type="button"
+                      onClick={() => galleryAddInputRef.current?.click()}
+                      className="aspect-4/3 border-2 border-dashed border-slate-300 hover:border-[#006989] rounded-xl flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-[#006989] bg-slate-50/70 hover:bg-slate-50 transition-all group"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-white shadow-xs border border-slate-200 flex items-center justify-center text-slate-500 group-hover:text-[#006989] group-hover:border-[#006989] transition-colors">
+                        <Plus className="w-4 h-4" />
+                      </div>
+                      <span className="text-[11px] font-bold">Add Photo</span>
+                    </button>
+                  </div>
+
+                  {/* Quick 1-Click Gallery Themes */}
+                  <div className="pt-2">
+                    <span className="text-[11px] font-bold text-slate-600 block mb-1.5">
+                      Or 1-Click Curated Gallery Themes:
+                    </span>
+                    <div className="space-y-1.5">
+                      {GALLERY_PRESETS.map((theme, tIdx) => (
+                        <button
+                          key={tIdx}
+                          type="button"
+                          onClick={() => onChangeCustomData({ ...customData, galleryPhotos: [...theme.photos] })}
+                          className="w-full p-2 rounded-xl border border-slate-200 hover:border-[#006989] bg-white hover:bg-slate-50/50 flex items-center justify-between text-left transition-all"
+                        >
+                          <div>
+                            <span className="text-xs font-bold text-slate-800 block">
+                              {theme.name}
+                            </span>
+                            <span className="text-[10px] text-slate-500">
+                              {theme.desc} ({theme.photos.length} photos)
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-semibold text-[#006989] hover:underline">
+                            Apply
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* TAB 5: SCHEDULE OF EVENTS */}
         {activeTab === 'schedule' && (

@@ -502,15 +502,23 @@
     if (secEl) tracked.countdown.seconds = secEl;
 
     // 4. Photo elements
-    var allImgs = Array.from(document.querySelectorAll('img'));
-    var coupleImgs = allImgs.filter(function (img) {
-      var src = img.getAttribute('src') || img.getAttribute('data-original') || '';
-      var width = img.naturalWidth || img.clientWidth || parseInt(img.getAttribute('width') || '0', 10);
-      var height = img.naturalHeight || img.clientHeight || parseInt(img.getAttribute('height') || '0', 10);
-      var isIcon = src.includes('icon') || src.includes('seal') || src.includes('arrow') || src.includes('Group_269') || src.includes('Screenshot_2026');
-      return !isIcon && (width > 120 || height > 120 || img.closest('.t396__elem, .pl-img'));
-    });
-    tracked.photoNodes = coupleImgs;
+    // Dolce Vita uses horizontal gallery slider only; no individual couple photo elements
+    var isDolce = !!document.querySelector('#carousel_2442651103') || !!document.querySelector('#rec2442651083') || (window.location.pathname.includes('dolce'));
+    if (isDolce) {
+      tracked.photoNodes = [];
+    } else {
+      var allImgs = Array.from(document.querySelectorAll('img'));
+      var coupleImgs = allImgs.filter(function (img) {
+        var src = img.getAttribute('src') || img.getAttribute('data-original') || '';
+        var width = img.naturalWidth || img.clientWidth || parseInt(img.getAttribute('width') || '0', 10);
+        var height = img.naturalHeight || img.clientHeight || parseInt(img.getAttribute('height') || '0', 10);
+        var isIcon = src.includes('icon') || src.includes('seal') || src.includes('arrow') || src.includes('Group_269') || src.includes('Screenshot_2026') || src.includes('Polygon');
+        var isEnvelope = img.closest('.t396') && (src.includes('Envelope') || src.includes('noroot') || src.includes('Untitled_Project') || src.includes('Group_'));
+        var isCarouselOrVenue = img.closest('.t1148__item, .t-slds__item, #rec2442651103, #rec2442651083, [id*="carousel"]');
+        return !isIcon && !isEnvelope && !isCarouselOrVenue && (img.closest('.pl-img') || width > 180 || height > 180);
+      });
+      tracked.photoNodes = coupleImgs;
+    }
   }
 
   function formatDateShort(dateStr) {
@@ -847,6 +855,108 @@
     });
   }
 
+  function setupDolceVitaGalleryControls() {
+    var gallery = document.querySelector('#rec2442651103 .t1148__gallery');
+    var slider = document.querySelector('#carousel_2442651103');
+    if (!gallery || !slider) return;
+
+    slider.style.scrollBehavior = 'smooth';
+    slider.style.overflowX = 'auto';
+    slider.style.webkitOverflowScrolling = 'touch';
+    slider.style.cursor = 'grab';
+    slider.style.userSelect = 'none';
+    slider.style.webkitUserSelect = 'none';
+
+    // Desktop mouse drag to scroll left/right
+    if (!slider.__wbg_dragInit) {
+      slider.__wbg_dragInit = true;
+      var isDown = false;
+      var startX = 0;
+      var scrollStart = 0;
+
+      slider.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        isDown = true;
+        slider.style.cursor = 'grabbing';
+        startX = e.pageX - slider.offsetLeft;
+        scrollStart = slider.scrollLeft;
+      });
+
+      window.addEventListener('mouseup', function () {
+        if (isDown) {
+          isDown = false;
+          slider.style.cursor = 'grab';
+        }
+      });
+
+      slider.addEventListener('mousemove', function (e) {
+        if (!isDown) return;
+        e.preventDefault();
+        var x = e.pageX - slider.offsetLeft;
+        var walk = (x - startX) * 1.5;
+        slider.scrollLeft = scrollStart - walk;
+      });
+    }
+
+    // Add navigation arrows if not present
+    if (!gallery.querySelector('.wbg-slider-arrow-next')) {
+      gallery.style.position = 'relative';
+
+      var arrowStyle = 
+        'position: absolute; top: 50%; transform: translateY(-50%); z-index: 30;' +
+        'width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.08);' +
+        'background: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 14px rgba(0,0,0,0.18);' +
+        'display: flex; align-items: center; justify-content: center; cursor: pointer;' +
+        'color: #2c3e50; transition: all 0.2s ease; outline: none; padding: 0;';
+
+      var prev = document.createElement('button');
+      prev.className = 'wbg-slider-arrow wbg-slider-arrow-prev';
+      prev.setAttribute('aria-label', 'Previous photo');
+      prev.setAttribute('type', 'button');
+      prev.style.cssText = arrowStyle + 'left: 10px;';
+      prev.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+
+      var next = document.createElement('button');
+      next.className = 'wbg-slider-arrow wbg-slider-arrow-next';
+      next.setAttribute('aria-label', 'Next photo');
+      next.setAttribute('type', 'button');
+      next.style.cssText = arrowStyle + 'right: 10px;';
+      next.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+
+      function addHover(btn) {
+        btn.addEventListener('mouseenter', function () {
+          btn.style.transform = 'translateY(-50%) scale(1.1)';
+          btn.style.background = '#ffffff';
+          btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
+        });
+        btn.addEventListener('mouseleave', function () {
+          btn.style.transform = 'translateY(-50%) scale(1)';
+          btn.style.background = 'rgba(255, 255, 255, 0.95)';
+          btn.style.boxShadow = '0 4px 14px rgba(0,0,0,0.18)';
+        });
+      }
+      addHover(prev);
+      addHover(next);
+
+      prev.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var step = Math.max(280, slider.clientWidth * 0.7);
+        slider.scrollBy({ left: -step, behavior: 'smooth' });
+      });
+
+      next.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var step = Math.max(280, slider.clientWidth * 0.7);
+        slider.scrollBy({ left: step, behavior: 'smooth' });
+      });
+
+      gallery.appendChild(prev);
+      gallery.appendChild(next);
+    }
+  }
+
   // Load and apply saved customization from sessionStorage / localStorage
   function loadSavedCustomization() {
     try {
@@ -858,6 +968,9 @@
       if (saved) {
         var parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
+          if (clean.includes('dolce')) {
+            delete parsed.photoUrl;
+          }
           applyCustomization(parsed);
         }
       }
@@ -1138,29 +1251,62 @@
     }
     setupDressCodePaletteInteractivity(palette);
 
-    // 9. UPDATE PHOTO
-    if (data.photoUrl) {
-      tracked.photoNodes.forEach(function (img) {
-        try {
-          img.src = data.photoUrl;
-          img.setAttribute('data-original', data.photoUrl);
-          img.style.opacity = '1';
-          img.style.visibility = 'visible';
-          img.style.objectFit = 'cover';
-        } catch (e) {}
-      });
-
+    // 9a. UPDATE COUPLE PHOTO (Main Portrait for templates that support it, NOT Dolce Vita)
+    var isDolce = !!document.querySelector('#carousel_2442651103') || !!document.querySelector('#rec2442651083') || (window.location.pathname.includes('dolce'));
+    if (data.photoUrl && !isDolce) {
+      // Captured Love polaroid photo
       var plImg = document.getElementById('plImg');
-      if (plImg) plImg.src = data.photoUrl;
+      if (plImg) {
+        plImg.src = data.photoUrl;
+      }
 
-      document.querySelectorAll('[style*="background-image"]').forEach(function (bgElem) {
-        var style = bgElem.getAttribute('style') || '';
-        if (style.includes('tild') && (bgElem.clientWidth > 150 || bgElem.clientHeight > 150)) {
-          bgElem.style.backgroundImage = 'url("' + data.photoUrl + '")';
-          bgElem.style.backgroundSize = 'cover';
-          bgElem.style.backgroundPosition = 'center';
+      // Other templates with dedicated couple images
+      if (tracked.photoNodes && tracked.photoNodes.length > 0) {
+        tracked.photoNodes.forEach(function (img) {
+          try {
+            img.src = data.photoUrl;
+            img.setAttribute('data-original', data.photoUrl);
+            img.style.opacity = '1';
+            img.style.visibility = 'visible';
+            img.style.objectFit = 'cover';
+          } catch (e) {}
+        });
+      }
+    }
+
+    // 9b. UPDATE DRESS CODE & GALLERY PHOTOS (Carousel slider)
+    if (data.galleryPhotos && Array.isArray(data.galleryPhotos)) {
+      var carousel = document.querySelector('#carousel_2442651103') ||
+                     document.querySelector('#rec2442651103 .t1148__slider');
+      if (carousel) {
+        var items = Array.from(carousel.querySelectorAll('.t1148__item'));
+        // If user added more photos than existing DOM items, clone the last item
+        while (items.length < data.galleryPhotos.length && items.length > 0) {
+          var clone = items[items.length - 1].cloneNode(true);
+          carousel.appendChild(clone);
+          items.push(clone);
         }
-      });
+
+        data.galleryPhotos.forEach(function (url, idx) {
+          if (items[idx]) {
+            items[idx].style.display = '';
+            var img = items[idx].querySelector('img');
+            if (img) {
+              img.src = url;
+              img.setAttribute('data-original', url);
+              img.style.objectFit = 'cover';
+            }
+            items[idx].setAttribute('aria-label', (idx + 1) + ' of ' + data.galleryPhotos.length);
+          }
+        });
+
+        // Hide any remaining DOM items if galleryPhotos has fewer items
+        for (var j = data.galleryPhotos.length; j < items.length; j++) {
+          items[j].style.display = 'none';
+        }
+
+        setupDolceVitaGalleryControls();
+      }
     }
 
     // 10. UPDATE WELCOME MESSAGE
@@ -1380,6 +1526,24 @@
         return;
       }
 
+      // Check for carousel slides or couple photos
+      var carouselItem = target.closest('.t1148__item');
+      var dolceCouple = target.closest('#rec2442651163') || (target.getAttribute && target.getAttribute('data-elem-id') === '1776926930895000002');
+      if (carouselItem) {
+        var allItems = Array.from(carouselItem.parentNode ? carouselItem.parentNode.querySelectorAll('.t1148__item') : []);
+        var slideIdx = allItems.indexOf(carouselItem);
+        try {
+          window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'photo', galleryIndex: slideIdx >= 0 ? slideIdx : 0 }, '*');
+        } catch (err) {}
+        return;
+      }
+      if (dolceCouple) {
+        try {
+          window.parent.postMessage({ type: 'WBG_FIELD_CLICKED', field: 'photo', couplePhoto: true }, '*');
+        } catch (err) {}
+        return;
+      }
+
       var atom = target.closest('.tn-atom') || target;
       var text = (atom.innerText || '').toLowerCase();
       var role = atom.getAttribute('data-wbg-role') || '';
@@ -1450,12 +1614,14 @@
     loadSavedCustomization();
     setupInteractiveClicks();
     adjustDolceVitaDressCodeLayout();
+    setupDolceVitaGalleryControls();
 
     [50, 150, 300, 600, 1200].forEach(function (delay) {
       setTimeout(function () {
         discoverElements();
         loadSavedCustomization();
         adjustDolceVitaDressCodeLayout();
+        setupDolceVitaGalleryControls();
       }, delay);
     });
 
@@ -1478,6 +1644,7 @@
     discoverElements();
     loadSavedCustomization();
     adjustDolceVitaDressCodeLayout();
+    setupDolceVitaGalleryControls();
   });
 
   window.addEventListener('resize', function () {
