@@ -24,7 +24,7 @@ export function WhatsAppWidget() {
 
       {/* WhatsApp Floating Circle */}
       <a
-        href="https://wa.me/37253240402?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
+        href="https://wa.me/96170710406?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
         target="_blank"
         rel="noreferrer"
         className="w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all relative group"

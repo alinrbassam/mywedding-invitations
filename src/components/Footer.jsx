@@ -35,7 +35,7 @@ export function Footer({ onScrollToSection, onOpenLegal }) {
                 <InstagramIcon className="w-4 h-4" />
               </a>
               <a
-                href="https://wa.me/37253240402"
+                href="https://wa.me/96170710406"
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-full bg-white shadow-xs border border-slate-300 flex items-center justify-center text-slate-600 hover:text-[#25D366] hover:border-[#25D366] transition-all"
@@ -105,12 +105,12 @@ export function Footer({ onScrollToSection, onOpenLegal }) {
             </p>
             <div className="space-y-2 text-xs font-semibold">
               <a
-                href="https://wa.me/37253240402"
+                href="https://wa.me/96170710406"
                 target="_blank"
                 rel="noreferrer"
                 className="block text-[#006989] hover:underline"
               >
-                WhatsApp: +372 5324 0402
+                WhatsApp: +961 70 710 406
               </a>
               <span className="block text-slate-500">
                 Available 7 days a week

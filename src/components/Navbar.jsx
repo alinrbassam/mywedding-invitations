@@ -81,7 +81,7 @@ export function Navbar({ onOpenOrder }) {
               <InstagramIcon className="w-5 h-5" />
             </a>
             <a
-              href="https://wa.me/37253240402?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
+              href="https://wa.me/96170710406?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
               target="_blank"
               rel="noreferrer"
               className="p-2 text-[#4a4a4a] hover:text-[#25D366] transition-colors rounded-full hover:bg-black/5"
@@ -141,7 +141,7 @@ export function Navbar({ onOpenOrder }) {
                 <InstagramIcon className="w-5 h-5" />
               </a>
               <a
-                href="https://wa.me/37253240402"
+                href="https://wa.me/96170710406"
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 text-[#4a4a4a] hover:text-[#25D366]"

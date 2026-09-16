@@ -283,7 +283,7 @@ export function OrderConfiguratorModal({
       `---------------------------------`,
       `Please confirm my order and send the next steps!`
     ];
-    return `https://wa.me/37253240402?text=${encodeURIComponent(lines.join('\n'))}`;
+    return `https://wa.me/96170710406?text=${encodeURIComponent(lines.join('\n'))}`;
   };
 
   if (!isOpen) return null;

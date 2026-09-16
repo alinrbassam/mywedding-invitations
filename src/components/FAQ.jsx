@@ -69,7 +69,7 @@ export function FAQ() {
           </div>
 
           <a
-            href="https://wa.me/37253240402?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
+            href="https://wa.me/96170710406?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
             target="_blank"
             rel="noreferrer"
             className="px-6 py-3 rounded-full bg-[#006989] hover:bg-[#005570] text-white font-bold text-xs uppercase tracking-wider transition-all shrink-0 flex items-center gap-2 shadow-sm"
