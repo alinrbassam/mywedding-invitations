@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, Smartphone, Monitor, ShoppingBag, ExternalLink, 
-  RefreshCw, SlidersHorizontal, Sparkles, Check, X, Plus 
+  RefreshCw, SlidersHorizontal, Sparkles, Check, X, Plus,
+  MessageCircle, Share2, Crown, Copy
 } from 'lucide-react';
 import { TemplateCustomizerDrawer } from './TemplateCustomizerDrawer';
+import { packInviteData } from '../data/clientInvites';
 
 const TEMPLATE_INFO = {
   'blossom-oud': { id: 'blossom-oud', name: 'Blossom & Oud', price: '€75', url: '/blossomoud.html', type: 'template' },
@@ -518,9 +520,25 @@ export function InvitationTemplateView({
   templateId = 'blossom-oud', 
   onBack, 
   onOrder,
-  initialCustomData = null
+  initialCustomData = null,
+  clientProfile = null
 }) {
   const info = TEMPLATE_INFO[templateId] || TEMPLATE_INFO['blossom-oud'];
+  const [isAdmin, setIsAdmin] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash || '';
+    if (urlParams.get('admin') === 'true' || urlParams.get('edit') === 'true' || hash.includes('admin=true')) {
+      localStorage.setItem('wbg_admin_mode', 'true');
+      return true;
+    }
+    if (urlParams.get('admin') === 'false' || urlParams.get('preview') === 'true') {
+      localStorage.setItem('wbg_admin_mode', 'false');
+      return false;
+    }
+    return localStorage.getItem('wbg_admin_mode') === 'true';
+  });
+  const [shareToast, setShareToast] = useState('');
   const [viewMode, setViewMode] = useState('mobile'); // 'mobile' or 'full'
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -1488,16 +1506,20 @@ export function InvitationTemplateView({
   // Zero-latency direct synchronous customization + postMessage fallback
   const broadcastCustomization = (data) => {
     if (!iframeRef.current) return;
+    const payload = {
+      ...(data || {}),
+      isAdmin: Boolean(isAdmin)
+    };
     try {
       // 1. Direct call to bridge global function (runs synchronously on same origin!)
       if (iframeRef.current.contentWindow && iframeRef.current.contentWindow.__wbg_applyCustomization) {
-        iframeRef.current.contentWindow.__wbg_applyCustomization(data);
+        iframeRef.current.contentWindow.__wbg_applyCustomization(payload);
       }
       // 2. PostMessage fallback
       if (iframeRef.current.contentWindow) {
         iframeRef.current.contentWindow.postMessage({
           type: 'WBG_UPDATE_CUSTOMIZATION',
-          data: data
+          data: payload
         }, '*');
       }
     } catch (e) {
@@ -2064,45 +2086,114 @@ export function InvitationTemplateView({
 
           <div className="flex items-center gap-2 border-l border-slate-700 pl-3">
             <span className="font-serif text-sm sm:text-base font-bold tracking-wide text-[#cebb78]">
-              {info.name}
+              {clientProfile?.clientName ? `${clientProfile.clientName}'s Invitation` : info.name}
             </span>
             <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#cebb78]/20 text-[#cebb78] font-semibold hidden md:inline">
-              Exact Live Template
+              {clientProfile ? 'Personalized Invitation' : 'Luxury Invitation'}
             </span>
           </div>
         </div>
 
+        {/* Share Toast Banner */}
+        {shareToast && (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in slide-in-from-top duration-200">
+            <Check className="w-4 h-4" />
+            <span>{shareToast}</span>
+          </div>
+        )}
+
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Update View / Force Instant Refresh Button */}
-          <button
-            onClick={handleForceUpdateView}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all border shadow-xs ${
-              showUpdateToast
-                ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
-                : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40 hover:scale-105'
-            }`}
-            title="Force immediate update of template preview"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-            <span>{showUpdateToast ? '⚡ View Updated!' : 'Update View'}</span>
-          </button>
+          {/* Admin Studio Controls (Only visible to you when ?admin=true) */}
+          {isAdmin ? (
+            <>
+              {/* Exit Studio Button */}
+              <button
+                onClick={() => {
+                  localStorage.setItem('wbg_admin_mode', 'false');
+                  setIsAdmin(false);
+                  setIsCustomizerOpen(false);
+                  broadcastCustomization({ ...customData, isAdmin: false });
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold hover:bg-amber-500/30 transition-all"
+                title="Switch to Customer/Guest View"
+              >
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Exit Studio</span>
+              </button>
 
-          {/* Personalize Button */}
-          <button
-            onClick={() => setIsCustomizerOpen(!isCustomizerOpen)}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-              isCustomizerOpen
-                ? 'bg-amber-400 text-[#08004b] shadow-md scale-105'
-                : 'bg-white/15 hover:bg-white/25 text-[#cebb78] border border-amber-300/40 hover:scale-105'
-            }`}
-            title="Open Personalization Drawer"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Personalize</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
-          </button>
+              {/* Share Client Link Button */}
+              <button
+                onClick={() => {
+                  let url = '';
+                  if (clientProfile && clientProfile.slug) {
+                    url = `${window.location.origin}/invite/${clientProfile.slug}`;
+                  } else {
+                    const slugPrompt = window.prompt('Enter client slug (e.g. hadi):', 'hadi');
+                    if (!slugPrompt) return;
+                    const cleanSlug = slugPrompt.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                    url = `${window.location.origin}/invite/${cleanSlug}`;
+                  }
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url);
+                  }
+                  setShareToast(`✓ Client link copied: ${url}`);
+                  setTimeout(() => setShareToast(''), 4000);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md hover:scale-105"
+                title="Copy shareable link for client"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Share Client Link</span>
+              </button>
+
+              {/* Update View / Force Instant Refresh Button */}
+              <button
+                onClick={handleForceUpdateView}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all border shadow-xs ${
+                  showUpdateToast
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
+                    : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/40 hover:scale-105'
+                }`}
+                title="Force immediate update of template preview"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+                <span>{showUpdateToast ? '⚡ View Updated!' : 'Update View'}</span>
+              </button>
+
+              {/* Personalize Button */}
+              <button
+                onClick={() => setIsCustomizerOpen(!isCustomizerOpen)}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  isCustomizerOpen
+                    ? 'bg-amber-400 text-[#08004b] shadow-md scale-105'
+                    : 'bg-white/15 hover:bg-white/25 text-[#cebb78] border border-amber-300/40 hover:scale-105'
+                }`}
+                title="Open Personalization Drawer"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Personalize</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+              </button>
+            </>
+          ) : (
+            /* Public / Customer Mode: Inquire on WhatsApp */
+            <a
+              href={`https://wa.me/96170710406?text=${encodeURIComponent(
+                clientProfile
+                  ? `Hello! I am reaching out regarding ${clientProfile.clientName || 'our'} wedding invitation.`
+                  : `Hello! I would like to inquire about the ${info.name} luxury wedding invitation.`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-105"
+              title="Chat with our designer on WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
+              <span>Inquire on WhatsApp</span>
+            </a>
+          )}
 
           {/* Viewport Switcher - hidden on real mobile phones to avoid header clutter */}
           <div className="hidden sm:flex items-center bg-white/10 rounded-full p-0.5 text-xs">
@@ -2140,14 +2231,16 @@ export function InvitationTemplateView({
             <span className="hidden md:inline">New Tab</span>
           </a>
 
-          {/* Direct Order Button */}
-          <button
-            onClick={() => onOrder(info.id, customData)}
-            className="flex items-center gap-1.5 px-3 sm:px-5 py-1.5 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-105"
-          >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Order ({info.price})</span>
-          </button>
+          {/* Submit Order Button (Admin Studio only) */}
+          {isAdmin && (
+            <button
+              onClick={() => onOrder(info.id, customData)}
+              className="hidden xl:flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-105"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Submit Order</span>
+            </button>
+          )}
         </div>
       </header>
 

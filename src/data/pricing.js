@@ -3,10 +3,9 @@ export const PACKAGES = [
     id: 'std',
     name: 'Save the Date',
     tagline: 'Announce your date with a stunning interactive experience.',
-    badge: '✨ New · Intro Price',
-    price: 35,
-    originalPrice: 50,
-    priceNote: 'Limited time · introductory price',
+    badge: '✨ Interactive Reveal',
+    priceTier: 'Custom Quote',
+    priceNote: 'Flexible package tailored to your date & venue',
     deliveryTime: 'Ready in 2–4 days',
     expressTime: '⚡ Express: 24h',
     featuresTitle: 'Always included',
@@ -16,50 +15,48 @@ export const PACKAGES = [
       'Share with unlimited guests',
       'Available in any language'
     ],
-    buttonText: 'Choose Your Save the Date',
-    subText: '3 interactive designs to choose from'
+    buttonText: 'Inquire on WhatsApp',
+    subText: 'Tailored specifically to your wedding dream'
   },
   {
     id: 'template',
     name: 'Template Invitation',
-    tagline: 'Choose from 9 beautiful designs. We adjust colors, texts, and photos to yours.',
+    tagline: 'Choose from our luxury designs. We adjust colors, typography, music, and photos to yours.',
     badge: '⭐ Most Popular',
     popular: true,
-    price: 75,
-    originalPrice: 120,
-    priceNote: 'Limited time offer',
+    priceTier: 'Custom Quote',
+    priceNote: 'Bespoke styling with unlimited revisions',
     deliveryTime: 'Ready in 4–7 days',
     expressTime: '⚡ Express: 24–48h',
     featuresTitle: 'Always included',
     features: [
       'Personal designer by your side',
-      '5 sections of your choice',
+      'Custom sections of your choice',
       'Smart RSVP tracking',
-      'Opening animation (envelope / seal)',
-      '3 photos of your choice',
+      'Opening animation (envelope / wax seal)',
+      'High-resolution photo reels & galleries',
       'Unlimited revisions and unlimited guests'
     ],
-    buttonText: 'Choose Template Invitation',
-    subText: '9 templates to choose from'
+    buttonText: 'Inquire on WhatsApp',
+    subText: 'Select your favourite design & chat with us'
   },
   {
     id: 'custom',
     name: 'Custom Invitation',
     tagline: 'A completely unique invitation built from scratch: no templates, pure imagination.',
     badge: '✦ 100% Bespoke',
-    price: 135,
-    originalPrice: 300,
-    priceNote: 'Base price · extra features available',
+    priceTier: 'Custom Quote',
+    priceNote: 'Handcrafted couture concept matching your vision',
     deliveryTime: 'Ready in 1–2 weeks',
     expressTime: '⚡ Express: 2–4 days',
     featuresTitle: 'Everything in Template, plus',
     features: [
       '100% original design from scratch',
       'Unique concept matching your theme',
-      'Custom animations and interactions',
-      'Priority designer support'
+      'Custom animations, audio & interactions',
+      'Dedicated priority designer support'
     ],
-    buttonText: 'Choose Custom Invitation',
+    buttonText: 'Inquire on WhatsApp',
     subText: 'Tailored specifically to your wedding dream'
   }
 ];

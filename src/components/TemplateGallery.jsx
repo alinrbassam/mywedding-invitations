@@ -124,8 +124,8 @@ export function TemplateGallery({ onSelectTemplate, onPreviewTemplate, onOpenFul
                       <h3 className="font-serif text-2xl font-bold text-[#08004b] group-hover:text-[#006989] transition-colors">
                         {template.name}
                       </h3>
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-                        From €75
+                      <span className="text-xs font-bold text-[#006989] bg-[#006989]/10 px-2.5 py-0.5 rounded-full">
+                        Bespoke Suite
                       </span>
                     </div>
 
@@ -149,17 +149,19 @@ export function TemplateGallery({ onSelectTemplate, onPreviewTemplate, onOpenFul
                       onClick={() => onOpenFullTemplate(template.id)}
                       className="py-2.5 px-2.5 rounded-xl border border-amber-300/80 bg-amber-50/50 text-[#08004b] hover:bg-amber-100/60 font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-[#b38f38]" />
-                      <span>Personalize</span>
+                      <Eye className="w-3.5 h-3.5 text-[#b38f38]" />
+                      <span>Live Demo</span>
                     </button>
 
-                    <button
-                      onClick={() => onSelectTemplate(template.id, 'template')}
+                    <a
+                      href={`https://wa.me/96170710406?text=${encodeURIComponent(`Hello! I would like to inquire about the ${template.name} wedding invitation.`)}`}
+                      target="_blank"
+                      rel="noreferrer"
                       className="py-2.5 px-2.5 rounded-xl bg-[#006989] hover:bg-[#005570] text-white font-bold text-xs tracking-wide transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-1.5"
                     >
-                      <span>Order €75</span>
+                      <span>Inquire</span>
                       <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>

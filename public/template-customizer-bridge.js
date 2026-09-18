@@ -2430,9 +2430,15 @@
       }
     }
 
-    // 27. RENDER INLINE "+ ADD BLOCK HERE" INSERTERS & ACTION BARS
-    renderSectionInserters();
-    attachSectionActionBars();
+    // 27. RENDER INLINE "+ ADD BLOCK HERE" INSERTERS & ACTION BARS (Admin only)
+    if (data && data.isAdmin) {
+      renderSectionInserters();
+      attachSectionActionBars();
+    } else {
+      document.querySelectorAll('.wbg-section-divider-inserter, .wbg-section-action-bar, .wbg-empty-canvas-placeholder').forEach(function (el) {
+        el.remove();
+      });
+    }
 
     try {
       window.parent.postMessage({ type: 'WBG_CUSTOMIZATION_APPLIED', timestamp: Date.now() }, '*');

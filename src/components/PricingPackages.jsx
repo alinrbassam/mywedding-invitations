@@ -62,19 +62,16 @@ export function PricingPackages({ onOpenOrder }) {
                     {pkg.tagline}
                   </p>
 
-                  {/* Price Row */}
-                  <div className="flex items-baseline gap-2.5 mb-1">
-                    <span className={`font-serif text-4xl sm:text-5xl font-bold ${
+                  {/* Luxury Service Row */}
+                  <div className="mb-6">
+                    <span className={`font-serif text-3xl sm:text-4xl font-bold block ${
                       isCustom ? 'text-[#9a8848]' : 'text-[#08004b]'
                     }`}>
-                      €{pkg.price}
+                      {pkg.priceTier || 'Custom Quote'}
                     </span>
-                    <span className="text-slate-400 text-lg line-through">
-                      €{pkg.originalPrice}
+                    <span className="text-[11px] text-slate-500 font-medium mt-1 block">
+                      {pkg.priceNote}
                     </span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 font-medium mb-6">
-                    {pkg.priceNote}
                   </div>
 
                   {/* Delivery Times */}
@@ -106,12 +103,12 @@ export function PricingPackages({ onOpenOrder }) {
 
                 {/* Bottom Button */}
                 <div className="space-y-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenOrder(pkg.id);
-                    }}
-                    className={`w-full py-3.5 px-4 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm group-hover:shadow-md ${
+                  <a
+                    href={`https://wa.me/96170710406?text=${encodeURIComponent(`Hello! I would like to inquire about the ${pkg.name} package.`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className={`w-full py-3.5 px-4 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-sm group-hover:shadow-md flex items-center justify-center gap-2 ${
                       isFeatured
                         ? 'bg-[#006989] hover:bg-[#005570] text-white'
                         : isCustom
@@ -119,8 +116,8 @@ export function PricingPackages({ onOpenOrder }) {
                         : 'bg-[#4aa8c8] hover:bg-[#3892b2] text-white'
                     }`}
                   >
-                    {pkg.buttonText}
-                  </button>
+                    <span>Inquire on WhatsApp</span>
+                  </a>
                   <p className="text-[11px] text-center text-slate-400 font-medium">
                     {pkg.subText}
                   </p>

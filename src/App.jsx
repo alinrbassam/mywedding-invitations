@@ -18,6 +18,7 @@ import { LegalModals } from './components/LegalModals';
 import { InvitationTemplateView } from './components/InvitationTemplateView';
 
 import { TEMPLATE_PAGES } from './data/templates';
+import { getClientInvite, unpackInviteData } from './data/clientInvites';
 
 export function App() {
   const [orderModal, setOrderModal] = useState({
@@ -30,29 +31,66 @@ export function App() {
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [legalType, setLegalType] = useState(null); // 'privacy' or 'terms'
   const [viewingTemplateId, setViewingTemplateId] = useState(null);
+  const [viewingCustomData, setViewingCustomData] = useState(null);
+  const [clientProfile, setClientProfile] = useState(null);
 
   // Check URL pathname and hash on load and listen for changes
   useEffect(() => {
     const handleRouteChange = () => {
-      // 1. Check clean path first (e.g. /the-sacred-garden, /dolce-vita, /template/timeless-grace)
       const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
       const hash = window.location.hash.replace('#', '').trim();
+      const urlParams = new URLSearchParams(window.location.search);
+
+      // Check for packed invite data in hash (#d=... or #data=...) or query (?d=... or ?data=...)
+      const encodedPayload = urlParams.get('d') || urlParams.get('data') || (hash.startsWith('d=') ? hash.replace('d=', '') : hash.startsWith('data=') ? hash.replace('data=', '') : null);
+      if (encodedPayload) {
+        const unpacked = unpackInviteData(encodedPayload);
+        if (unpacked && unpacked.tpl) {
+          setViewingTemplateId(unpacked.tpl);
+          setViewingCustomData(unpacked.data || null);
+          setClientProfile({ clientName: unpacked.data?.partner1 ? `${unpacked.data.partner1} & ${unpacked.data.partner2}` : 'Client Preview' });
+          return;
+        }
+      }
 
       if (path) {
         if (path.startsWith('template/')) {
           const id = path.replace('template/', '');
           setViewingTemplateId(id);
+          setViewingCustomData(null);
+          setClientProfile(null);
           return;
         }
         if (path.startsWith('invite/')) {
           const slug = path.replace('invite/', '');
+          const client = getClientInvite(slug);
+          if (client) {
+            setViewingTemplateId(client.templateId);
+            setViewingCustomData(client.customData);
+            setClientProfile(client);
+            return;
+          }
+          // Fallback to session/local storage if any
           const savedCustom = sessionStorage.getItem('wbg_custom_' + slug.replace(/[^a-z0-9]/gi, '')) ||
                               localStorage.getItem('wbg_custom_' + slug.replace(/[^a-z0-9]/gi, ''));
-          setViewingTemplateId('blossom-oud');
+          setViewingTemplateId('dolce-vita');
+          if (savedCustom) {
+            try { setViewingCustomData(JSON.parse(savedCustom)); } catch (e) {}
+          }
+          return;
+        }
+        // Direct customer slug e.g. /hadi
+        const directClient = getClientInvite(path);
+        if (directClient) {
+          setViewingTemplateId(directClient.templateId);
+          setViewingCustomData(directClient.customData);
+          setClientProfile(directClient);
           return;
         }
         if (TEMPLATE_PAGES[path]) {
           setViewingTemplateId(path);
+          setViewingCustomData(null);
+          setClientProfile(null);
           return;
         }
       }
@@ -61,10 +99,16 @@ export function App() {
       if (hash.startsWith('template/')) {
         const id = hash.replace('template/', '');
         setViewingTemplateId(id);
+        setViewingCustomData(null);
+        setClientProfile(null);
       } else if (TEMPLATE_PAGES[hash]) {
         setViewingTemplateId(hash);
+        setViewingCustomData(null);
+        setClientProfile(null);
       } else if (!hash || ['hero', 'templates', 'pricing', 'reviews', 'faq', 'how-it-works'].includes(hash)) {
         setViewingTemplateId(null);
+        setViewingCustomData(null);
+        setClientProfile(null);
       }
     };
 
@@ -115,6 +159,8 @@ export function App() {
       <InvitationTemplateView
         templateId={viewingTemplateId}
         onBack={handleBackFromTemplate}
+        initialCustomData={viewingCustomData}
+        clientProfile={clientProfile}
         onOrder={(designId, customData) => {
           handleBackFromTemplate();
           handleOpenOrder('template', designId, customData);
