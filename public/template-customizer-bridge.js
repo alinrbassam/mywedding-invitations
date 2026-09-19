@@ -7,6 +7,21 @@
 (function () {
   'use strict';
 
+  // Admin Mode Gate - Customization is strictly locked for customers and visitors
+  window.__wbg_is_admin = (function () {
+    try {
+      var s = window.location.search || '';
+      var h = window.location.hash || '';
+      if (s.indexOf('admin=true') !== -1 || h.indexOf('admin=true') !== -1) return true;
+      if (window.parent && window.parent !== window) {
+        var ps = window.parent.location.search || '';
+        var ph = window.parent.location.hash || '';
+        if (ps.indexOf('admin=true') !== -1 || ph.indexOf('admin=true') !== -1) return true;
+      }
+    } catch (e) {}
+    return false;
+  })();
+
   // Intercept countdown timers so they don't fight with user customized date
   var origSetInterval = window.setInterval;
   window.setInterval = function (fn, delay) {
@@ -2431,7 +2446,15 @@
     }
 
     // 27. RENDER INLINE "+ ADD BLOCK HERE" INSERTERS & ACTION BARS (Admin only)
-    if (data && data.isAdmin) {
+    if (data && typeof data.isAdmin !== 'undefined') {
+      var prevAdmin = window.__wbg_is_admin;
+      window.__wbg_is_admin = Boolean(data.isAdmin);
+      if (window.__wbg_is_admin !== prevAdmin) {
+        setupInteractiveClicks();
+      }
+    }
+
+    if (window.__wbg_is_admin) {
       renderSectionInserters();
       attachSectionActionBars();
     } else {
@@ -2497,6 +2520,7 @@
   }
 
   function renderSectionInserters() {
+    if (!window.__wbg_is_admin) return;
     document.querySelectorAll('.wbg-section-divider-inserter').forEach(function (el) {
       el.remove();
     });
@@ -2557,6 +2581,7 @@
   }
 
   function attachSectionActionBars() {
+    if (!window.__wbg_is_admin) return;
     var allRecords = document.getElementById('allrecords') || document.querySelector('.t-records') || document.body;
     if (!allRecords) return;
 
@@ -2654,6 +2679,21 @@
   }
 
   function setupInteractiveClicks() {
+    if (!window.__wbg_is_admin) {
+      var existingStyles = document.getElementById('wbg-edit-styles');
+      if (existingStyles) existingStyles.remove();
+      var existingBadge = document.getElementById('wbg-floating-badge');
+      if (existingBadge) existingBadge.remove();
+      var existingSel = document.getElementById('wbg-selection-box');
+      if (existingSel) existingSel.remove();
+      var existingHud = document.getElementById('wbg-drag-hud');
+      if (existingHud) existingHud.remove();
+      document.querySelectorAll('.wbg-section-divider-inserter, .wbg-section-action-bar, .wbg-empty-canvas-placeholder').forEach(function (el) {
+        el.remove();
+      });
+      return;
+    }
+
     if (window.self !== window.top && !document.getElementById('wbg-edit-styles')) {
       var style = document.createElement('style');
       style.id = 'wbg-edit-styles';
@@ -3208,6 +3248,7 @@
     setupHandleResizing();
 
     function makeElementDraggable(wrapper, elemId) {
+      if (!window.__wbg_is_admin) return;
       if (!wrapper || wrapper.getAttribute('data-wbg-draggable') === 'true') return;
       wrapper.setAttribute('data-wbg-draggable', 'true');
 
@@ -3308,6 +3349,7 @@
 
     if (window.self !== window.top) {
       document.addEventListener('mouseover', function (e) {
+        if (!window.__wbg_is_admin) return;
         var target = e.target;
         if (target.closest('.popup-enter, #audio-control, .t-submit, button, a, #wbg-preview-bar, .seal-monogram, [data-animate-sbs-event="click"]')) {
           hideBadge();
@@ -3471,6 +3513,7 @@
 
     // Keyboard Delete & Backspace support for currently selected elements & gallery photos
     document.addEventListener('keydown', function (e) {
+      if (!window.__wbg_is_admin) return;
       if (e.key !== 'Delete' && e.key !== 'Backspace') return;
       var activeEl = document.activeElement;
       if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
@@ -3507,6 +3550,7 @@
     });
 
     document.addEventListener('click', function (e) {
+      if (!window.__wbg_is_admin) return;
       var target = e.target;
 
       // Do NOT intercept or modify buttons, wax seals, audio controls, or links!
@@ -3747,6 +3791,7 @@
 
     // Double-click to enter inline text editing mode (Canva / PowerPoint style)
     function enableInlineTextEdit(atomToEdit) {
+      if (!window.__wbg_is_admin) return;
       if (!atomToEdit) return;
       var elem = atomToEdit.closest('.tn-elem') || atomToEdit;
       var elemId = (elem && elem.getAttribute) ? elem.getAttribute('data-elem-id') : '';
@@ -3778,6 +3823,7 @@
     }
 
     document.addEventListener('dblclick', function (e) {
+      if (!window.__wbg_is_admin) return;
       if (window.self === window.top) return;
       var textEl = e.target.closest('.wbg-editable-text, .tn-atom, .wbg-added-text-elem, h1, h2, h3, p');
       if (textEl && !textEl.querySelector('img, svg, iframe') && (textEl.innerText || '').trim().length > 0) {

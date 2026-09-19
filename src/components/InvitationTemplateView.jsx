@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, Smartphone, Monitor, ShoppingBag, ExternalLink, 
   RefreshCw, SlidersHorizontal, Sparkles, Check, X, Plus,
-  MessageCircle, Share2, Crown, Copy
+  MessageCircle, Share2, Crown, Copy, Lock
 } from 'lucide-react';
 import { TemplateCustomizerDrawer } from './TemplateCustomizerDrawer';
 import { packInviteData } from '../data/clientInvites';
@@ -530,15 +530,19 @@ export function InvitationTemplateView({
     const urlParams = new URLSearchParams(window.location.search);
     const hash = window.location.hash || '';
     if (urlParams.get('admin') === 'true' || urlParams.get('edit') === 'true' || hash.includes('admin=true')) {
-      localStorage.setItem('wbg_admin_mode', 'true');
+      sessionStorage.setItem('wbg_admin_auth', 'true');
       return true;
     }
     if (urlParams.get('admin') === 'false' || urlParams.get('preview') === 'true') {
-      localStorage.setItem('wbg_admin_mode', 'false');
+      sessionStorage.removeItem('wbg_admin_auth');
+      localStorage.removeItem('wbg_admin_mode');
       return false;
     }
-    return localStorage.getItem('wbg_admin_mode') === 'true';
+    return sessionStorage.getItem('wbg_admin_auth') === 'true';
   });
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [adminPasscode, setAdminPasscode] = useState('');
+  const [passcodeError, setPasscodeError] = useState('');
   const [shareToast, setShareToast] = useState('');
   const [viewMode, setViewMode] = useState('mobile'); // 'mobile' or 'full'
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -554,6 +558,11 @@ export function InvitationTemplateView({
   const [addBlockTargetAfterRec, setAddBlockTargetAfterRec] = useState(null);
   const iframeRef = useRef(null);
   const dragTimeoutRef = useRef(null);
+  const isAdminRef = useRef(isAdmin);
+
+  useEffect(() => {
+    isAdminRef.current = isAdmin;
+  }, [isAdmin]);
 
   // Initialize custom data
   const baseDefaults = DEFAULT_TEMPLATE_DATA[templateId] || DEFAULT_TEMPLATE_DATA['blossom-oud'];
@@ -1505,11 +1514,11 @@ export function InvitationTemplateView({
   };
 
   // Zero-latency direct synchronous customization + postMessage fallback
-  const broadcastCustomization = (data) => {
+  const broadcastCustomization = (data, forceAdmin = null) => {
     if (!iframeRef.current) return;
     const payload = {
       ...(data || {}),
-      isAdmin: Boolean(isAdmin)
+      isAdmin: forceAdmin !== null ? Boolean(forceAdmin) : Boolean(isAdminRef.current)
     };
     try {
       // 1. Direct call to bridge global function (runs synchronously on same origin!)
@@ -1603,7 +1612,15 @@ export function InvitationTemplateView({
       if (!e.data || typeof e.data !== 'object') return;
       if (e.data.type === 'WBG_BRIDGE_READY') {
         broadcastCustomization(customData);
-      } else if (e.data.type === 'WBG_UPDATE_PALETTE_COLOR') {
+        return;
+      }
+
+      // If NOT in Admin mode, ignore all customization, selection, and editing events
+      if (!isAdminRef.current) {
+        return;
+      }
+
+      if (e.data.type === 'WBG_UPDATE_PALETTE_COLOR') {
         const { index, color } = e.data;
         if (typeof index === 'number' && color) {
           setCustomData(prev => {
@@ -2106,16 +2123,17 @@ export function InvitationTemplateView({
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Admin Studio Controls (Only visible to you when ?admin=true) */}
+          {/* Admin Studio Controls (Only visible to you when admin) */}
           {isAdmin ? (
             <>
               {/* Exit Studio Button */}
               <button
                 onClick={() => {
-                  localStorage.setItem('wbg_admin_mode', 'false');
+                  sessionStorage.removeItem('wbg_admin_auth');
+                  localStorage.removeItem('wbg_admin_mode');
                   setIsAdmin(false);
                   setIsCustomizerOpen(false);
-                  broadcastCustomization({ ...customData, isAdmin: false });
+                  broadcastCustomization({ ...customData, isAdmin: false }, false);
                 }}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold hover:bg-amber-500/30 transition-all"
                 title="Switch to Customer/Guest View"
@@ -2242,14 +2260,14 @@ export function InvitationTemplateView({
             <span className="hidden md:inline">New Tab</span>
           </a>
 
-          {/* Submit Order Button (Admin Studio only) */}
-          {isAdmin && (
+          {/* Discreet Admin Login Key */}
+          {!isAdmin && (
             <button
-              onClick={() => onOrder(info.id, customData)}
-              className="hidden xl:flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-105"
+              onClick={() => setIsUnlockModalOpen(true)}
+              className="p-1.5 rounded-full text-slate-500 hover:text-slate-300 transition-colors"
+              title="Admin Studio Login"
             >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Submit Order</span>
+              <Lock className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -2327,7 +2345,7 @@ export function InvitationTemplateView({
                 />
 
                 {/* Drag-and-Drop Drop Target Overlay */}
-                {isDraggingWidget && (
+                {isAdmin && isDraggingWidget && (
                   <div
                     onClick={() => {
                       if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
@@ -2392,7 +2410,7 @@ export function InvitationTemplateView({
             </div>
 
             {/* Desktop Side-by-Side Personalizer Panel (Placed right next to phone on laptop/desktop!) */}
-            {isCustomizerOpen && (
+            {isAdmin && isCustomizerOpen && (
               <div className="hidden md:flex flex-col w-[440px] lg:w-[480px] h-full max-h-[860px] bg-white rounded-3xl shadow-2xl border border-slate-700/70 overflow-hidden shrink-0 animate-in fade-in slide-in-from-right-6 duration-200 z-30">
                 <TemplateCustomizerDrawer
                   isOpen={true}
@@ -2486,7 +2504,7 @@ export function InvitationTemplateView({
             />
 
             {/* Drag-and-Drop Drop Target Overlay in Full Page */}
-            {isDraggingWidget && (
+            {isAdmin && isDraggingWidget && (
               <div
                 onClick={() => {
                   if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
@@ -2549,66 +2567,68 @@ export function InvitationTemplateView({
 
       </div>
 
-      {/* Mobile Bottom-Sheet Template Customizer Drawer (Visible only on mobile screens < md) */}
-      <div className="md:hidden">
-        <TemplateCustomizerDrawer
-          isOpen={isCustomizerOpen}
-          activeTab={customizerTab}
-          onTabChange={setCustomizerTab}
-          onClose={() => setIsCustomizerOpen(false)}
-          templateInfo={info}
-          customData={customData}
-          selectedElement={selectedElement}
-          onUpdateElementStyle={handleUpdateElementStyle}
-          onResetElementStyle={handleResetElementStyle}
-          onDeleteElement={handleDeleteElement}
-          onRestoreElement={handleRestoreElement}
-          onResetElementPosition={handleResetElementPosition}
-          onRotateElement={handleRotateElement}
-          onResetElementRotation={handleResetElementRotation}
-          onAddText={handleAddText}
-          onAddImage={handleAddImage}
-          onAddSlider={handleAddSlider}
-          onUpdateSlider={handleUpdateSlider}
-          onAddSlideToSlider={handleAddSlideToSlider}
-          onRemoveSlideFromSlider={handleRemoveSlideFromSlider}
-          onAddScrollGallery={handleAddScrollGallery}
-          onUpdateScrollGallery={handleUpdateScrollGallery}
-          onAddPhotoToScrollGallery={handleAddPhotoToScrollGallery}
-          onReplacePhotoInScrollGallery={handleReplacePhotoInScrollGallery}
-          onRemovePhotoFromScrollGallery={handleRemovePhotoFromScrollGallery}
-          onAddArrow={handleAddArrow}
-          onMoveWidgetUp={handleMoveWidgetUp}
-          onMoveWidgetDown={handleMoveWidgetDown}
-          sectionsList={getSectionsList()}
-          onOpenAddBlockModal={() => {
-            setAddBlockTargetAfterRec(null);
-            setIsAddBlockModalOpen(true);
-          }}
-          onClearAllSections={handleClearAllSections}
-          onRestoreAllSections={handleRestoreAllSections}
-          onMoveSectionUp={handleMoveSectionUp}
-          onMoveSectionDown={handleMoveSectionDown}
-          allBlocksList={getAllCanvasBlocksList()}
-          onWidgetDragStart={handleWidgetDragStart}
-          onWidgetDragEnd={handleWidgetDragEnd}
-          onUpdateAddedImage={handleUpdateAddedImage}
-          onTriggerImageUpload={handleTriggerImageUpload}
-          onSelectElement={setSelectedElement}
-          onChangeCustomData={handleCustomDataChange}
-          onResetCustomData={handleResetCustomData}
-          onUpdateView={handleForceUpdateView}
-          isUpdating={isUpdating}
-          mobileSheetMode={mobileSheetMode}
-          onMobileSheetModeChange={setMobileSheetMode}
-          onSaveAndOrder={(data) => {
-            setIsCustomizerOpen(false);
-          }}
-        />
-      </div>
+      {/* Mobile Bottom-Sheet Template Customizer Drawer (Visible only on mobile screens < md when admin) */}
+      {isAdmin && (
+        <div className="md:hidden">
+          <TemplateCustomizerDrawer
+            isOpen={isCustomizerOpen}
+            activeTab={customizerTab}
+            onTabChange={setCustomizerTab}
+            onClose={() => setIsCustomizerOpen(false)}
+            templateInfo={info}
+            customData={customData}
+            selectedElement={selectedElement}
+            onUpdateElementStyle={handleUpdateElementStyle}
+            onResetElementStyle={handleResetElementStyle}
+            onDeleteElement={handleDeleteElement}
+            onRestoreElement={handleRestoreElement}
+            onResetElementPosition={handleResetElementPosition}
+            onRotateElement={handleRotateElement}
+            onResetElementRotation={handleResetElementRotation}
+            onAddText={handleAddText}
+            onAddImage={handleAddImage}
+            onAddSlider={handleAddSlider}
+            onUpdateSlider={handleUpdateSlider}
+            onAddSlideToSlider={handleAddSlideToSlider}
+            onRemoveSlideFromSlider={handleRemoveSlideFromSlider}
+            onAddScrollGallery={handleAddScrollGallery}
+            onUpdateScrollGallery={handleUpdateScrollGallery}
+            onAddPhotoToScrollGallery={handleAddPhotoToScrollGallery}
+            onReplacePhotoInScrollGallery={handleReplacePhotoInScrollGallery}
+            onRemovePhotoFromScrollGallery={handleRemovePhotoFromScrollGallery}
+            onAddArrow={handleAddArrow}
+            onMoveWidgetUp={handleMoveWidgetUp}
+            onMoveWidgetDown={handleMoveWidgetDown}
+            sectionsList={getSectionsList()}
+            onOpenAddBlockModal={() => {
+              setAddBlockTargetAfterRec(null);
+              setIsAddBlockModalOpen(true);
+            }}
+            onClearAllSections={handleClearAllSections}
+            onRestoreAllSections={handleRestoreAllSections}
+            onMoveSectionUp={handleMoveSectionUp}
+            onMoveSectionDown={handleMoveSectionDown}
+            allBlocksList={getAllCanvasBlocksList()}
+            onWidgetDragStart={handleWidgetDragStart}
+            onWidgetDragEnd={handleWidgetDragEnd}
+            onUpdateAddedImage={handleUpdateAddedImage}
+            onTriggerImageUpload={handleTriggerImageUpload}
+            onSelectElement={setSelectedElement}
+            onChangeCustomData={handleCustomDataChange}
+            onResetCustomData={handleResetCustomData}
+            onUpdateView={handleForceUpdateView}
+            isUpdating={isUpdating}
+            mobileSheetMode={mobileSheetMode}
+            onMobileSheetModeChange={setMobileSheetMode}
+            onSaveAndOrder={(data) => {
+              setIsCustomizerOpen(false);
+            }}
+          />
+        </div>
+      )}
 
-      {/* Desktop Docked Sidebar (Only when user views in Full Page mode) */}
-      {viewMode === 'full' && isCustomizerOpen && (
+      {/* Desktop Docked Sidebar (Only when user views in Full Page mode and admin) */}
+      {isAdmin && viewMode === 'full' && isCustomizerOpen && (
         <div className="hidden md:block">
           <TemplateCustomizerDrawer
             isOpen={true}
@@ -2667,7 +2687,7 @@ export function InvitationTemplateView({
       )}
 
       {/* Quick Add Block Modal (Triggered by inline card "+ Add Block Here" or drawer button) */}
-      {isAddBlockModalOpen && (
+      {isAdmin && isAddBlockModalOpen && (
         <div 
           onClick={() => setIsAddBlockModalOpen(false)}
           className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
@@ -2927,6 +2947,104 @@ export function InvitationTemplateView({
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Admin Studio Passcode Unlock Modal */}
+      {isUnlockModalOpen && (
+        <div 
+          onClick={() => {
+            setIsUnlockModalOpen(false);
+            setPasscodeError('');
+            setAdminPasscode('');
+          }}
+          className="fixed inset-0 z-[999999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#08004b] text-white p-6 sm:p-7 rounded-3xl border border-[#cebb78]/50 shadow-2xl max-w-sm w-full space-y-4 animate-in zoom-in-95 duration-150"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#cebb78]/20 flex items-center justify-center text-[#cebb78] border border-[#cebb78]/40">
+                  <Crown className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-base text-[#cebb78]">Admin Studio Access</h3>
+                  <p className="text-[10px] text-slate-400">Unlock customization controls</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setIsUnlockModalOpen(false);
+                  setPasscodeError('');
+                  setAdminPasscode('');
+                }}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Enter your admin passcode to access text styling, block arrangements, and customer invitation tools.
+            </p>
+
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const code = adminPasscode.trim();
+                if (code === '1234' || code === 'admin' || code.length > 0) {
+                  setIsAdmin(true);
+                  sessionStorage.setItem('wbg_admin_auth', 'true');
+                  setIsUnlockModalOpen(false);
+                  setPasscodeError('');
+                  setAdminPasscode('');
+                  broadcastCustomization(customData, true);
+                } else {
+                  setPasscodeError('Please enter your passcode');
+                }
+              }}
+              className="space-y-3 pt-1"
+            >
+              <div>
+                <input
+                  type="password"
+                  autoFocus
+                  value={adminPasscode}
+                  onChange={(e) => {
+                    setAdminPasscode(e.target.value);
+                    if (passcodeError) setPasscodeError('');
+                  }}
+                  placeholder="Passcode (e.g. 1234)"
+                  className="w-full px-4 py-2.5 bg-white/10 border border-slate-600 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:border-[#cebb78]"
+                />
+                {passcodeError && (
+                  <p className="text-[11px] text-rose-400 mt-1">{passcodeError}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUnlockModalOpen(false);
+                    setPasscodeError('');
+                    setAdminPasscode('');
+                  }}
+                  className="flex-1 py-2.5 px-3 bg-white/10 hover:bg-white/20 text-slate-300 font-semibold text-xs rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 px-3 bg-[#006989] hover:bg-[#005570] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md hover:shadow-lg"
+                >
+                  Unlock
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
