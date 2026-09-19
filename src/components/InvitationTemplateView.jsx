@@ -521,7 +521,8 @@ export function InvitationTemplateView({
   onBack, 
   onOrder,
   initialCustomData = null,
-  clientProfile = null
+  clientProfile = null,
+  onOpenDashboard = null
 }) {
   const info = TEMPLATE_INFO[templateId] || TEMPLATE_INFO['blossom-oud'];
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -2123,23 +2124,33 @@ export function InvitationTemplateView({
                 <span className="hidden sm:inline">Exit Studio</span>
               </button>
 
+              {/* Guest RSVPs Dashboard Button */}
+              <button
+                onClick={() => {
+                  const slug = clientProfile?.slug || 'hadi';
+                  if (onOpenDashboard) {
+                    onOpenDashboard(slug);
+                  } else {
+                    window.open(`/invite/${slug}/guests`, '_blank');
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md hover:scale-105"
+                title="View live RSVP guest list and catering stats"
+              >
+                <span>📊 Guest RSVPs</span>
+              </button>
+
               {/* Share Client Link Button */}
               <button
                 onClick={() => {
-                  let url = '';
-                  if (clientProfile && clientProfile.slug) {
-                    url = `${window.location.origin}/invite/${clientProfile.slug}`;
-                  } else {
-                    const slugPrompt = window.prompt('Enter client slug (e.g. hadi):', 'hadi');
-                    if (!slugPrompt) return;
-                    const cleanSlug = slugPrompt.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-                    url = `${window.location.origin}/invite/${cleanSlug}`;
-                  }
+                  let slug = clientProfile?.slug || 'hadi';
+                  const url = `${window.location.origin}/invite/${slug}`;
+                  const dashUrl = `${window.location.origin}/invite/${slug}/guests`;
                   if (navigator.clipboard) {
                     navigator.clipboard.writeText(url);
                   }
-                  setShareToast(`✓ Client link copied: ${url}`);
-                  setTimeout(() => setShareToast(''), 4000);
+                  setShareToast(`✓ Copied Invite: ${url} | Dashboard: ${dashUrl}`);
+                  setTimeout(() => setShareToast(''), 5000);
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md hover:scale-105"
                 title="Copy shareable link for client"

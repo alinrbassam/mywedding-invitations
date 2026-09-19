@@ -3924,6 +3924,261 @@
     }
   });
 
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function showLuxuryConfirmation(formEl, payload) {
+    if (!formEl) return;
+    var container = formEl.closest('.t702__wrapper') || formEl.closest('.t-popup__container') || formEl.parentElement || formEl;
+    var partner1 = (lastApplied && lastApplied.partner1) || 'Hadi';
+    var partner2 = (lastApplied && lastApplied.partner2) || 'Nour';
+    var couple = partner1 + ' & ' + partner2;
+
+    var isYes = payload.attending === 'yes';
+    var title = isYes ? 'RSVP Confirmed!' : 'Response Received';
+    var subtitle = isYes
+      ? (couple + ' look forward to celebrating together!')
+      : 'Thank you for letting us know. You will be dearly missed!';
+
+    var detailsBadge = isYes
+      ? '<div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;background:rgba(206,187,120,0.15);border:1px solid rgba(206,187,120,0.35);border-radius:30px;color:#857035;font-size:13px;font-weight:600;margin-bottom:18px;">' +
+        '🥂 ' + payload.adultsCount + ' Adult' + (payload.adultsCount > 1 ? 's' : '') +
+        (payload.kidsCount > 0 ? (' • ' + payload.kidsCount + ' Child' + (payload.kidsCount > 1 ? 'ren' : '')) : '') +
+        '</div>'
+      : '<div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:30px;color:#b91c1c;font-size:13px;font-weight:600;margin-bottom:18px;">' +
+        'Declined with regrets' +
+        '</div>';
+
+    var confirmCard = document.createElement('div');
+    confirmCard.className = 'wbg-luxury-confirm-card';
+    confirmCard.style.cssText = [
+      'display: flex',
+      'flex-direction: column',
+      'align-items: center',
+      'justify-content: center',
+      'text-align: center',
+      'padding: 36px 24px',
+      'background: linear-gradient(135deg, #ffffff 0%, #fffdf8 100%)',
+      'border: 1px solid rgba(206,187,120,0.4)',
+      'border-radius: 24px',
+      'box-shadow: 0 16px 36px rgba(0,0,0,0.07)',
+      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif',
+      'width: 100%',
+      'max-width: 460px',
+      'margin: 0 auto',
+      'box-sizing: border-box'
+    ].join(';');
+
+    confirmCard.innerHTML = 
+      '<div style="width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#cebb78 0%,#e5d59e 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(206,187,120,0.35);margin-bottom:18px;color:#08004b;font-size:28px;font-weight:bold;">' +
+        (isYes ? '✓' : '✦') +
+      '</div>' +
+      '<h2 style="font-family:\'Alex Brush\',\'Great Vibes\',Georgia,serif;font-size:38px;color:#08004b;margin:0 0 6px 0;line-height:1.2;">' +
+        'Thank You, ' + escapeHtml(payload.name) +
+      '</h2>' +
+      '<div style="font-size:14px;font-weight:700;color:#806b43;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;">' +
+        title +
+      '</div>' +
+      '<p style="font-size:14px;color:#555;line-height:1.6;margin:0 0 16px 0;max-width:320px;">' +
+        subtitle +
+      '</p>' +
+      detailsBadge +
+      (payload.notes ? ('<div style="font-size:12px;color:#666;font-style:italic;background:#f9f8f5;padding:10px 16px;border-radius:12px;border:1px dashed rgba(206,187,120,0.3);margin-bottom:20px;max-width:340px;line-height:1.4;">“' + escapeHtml(payload.notes) + '”</div>') : '') +
+      '<button id="wbgCloseConfirmBtn" style="padding:11px 28px;border-radius:30px;background:#08004b;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(8,0,75,0.25);">' +
+        'Close Window' +
+      '</button>';
+
+    // Hide original form inputs & text header
+    formEl.style.display = 'none';
+    var textWrapper = container.querySelector('.t702__text-wrapper');
+    if (textWrapper) textWrapper.style.display = 'none';
+    var imgWrapper = container.querySelector('.t702__img');
+    if (imgWrapper) imgWrapper.style.display = 'none';
+
+    container.appendChild(confirmCard);
+
+    var closeBtn = confirmCard.querySelector('#wbgCloseConfirmBtn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var popup = container.closest('.t-popup, .t702');
+        if (popup) {
+          popup.classList.remove('t-popup_show');
+          popup.style.display = 'none';
+        }
+        var closeButton = document.querySelector('.t-popup__close-wrapper, .t-popup__close, .t-popup__block-close-button');
+        if (closeButton) {
+          try { closeButton.click(); } catch (err) {}
+        }
+        if (typeof window.t702_closePopup === 'function') {
+          try { window.t702_closePopup(); } catch (err) {}
+        }
+      });
+    }
+  }
+
+  function handleRsvpSubmission(formEl) {
+    if (!formEl) return;
+
+    // 1. Guest Name
+    var nameInput = formEl.querySelector('input[name="Name"], input[name*="name" i], input[data-field-name*="name" i], input[type="text"]');
+    var guestName = nameInput ? nameInput.value.trim() : '';
+    if (!guestName) {
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.style.borderColor = '#ef4444';
+        setTimeout(function () { nameInput.style.borderColor = ''; }, 2500);
+      }
+      return;
+    }
+
+    // 2. Attendance Status
+    var attending = 'yes';
+    var checkedBoxes = Array.from(formEl.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked'));
+    if (checkedBoxes.length > 0) {
+      var val = checkedBoxes.map(function (c) { return c.value || ''; }).join(' ').toLowerCase();
+      if (val.includes('cant') || val.includes("can't") || val.includes('unfortunately') || val.includes('no') || val.includes('decline')) {
+        attending = 'no';
+      } else if (val.includes('yes') || val.includes('will') || val.includes('attend')) {
+        attending = 'yes';
+      }
+    } else {
+      var hiddenInput = formEl.querySelector('.t-checkboxes__hiddeninput, input[name*="come" i], input[data-field-name*="come" i]');
+      if (hiddenInput && hiddenInput.value) {
+        var hVal = hiddenInput.value.toLowerCase();
+        if (hVal.includes('cant') || hVal.includes("can't") || hVal.includes('unfortunately') || hVal.includes('no') || hVal.includes('decline')) {
+          attending = 'no';
+        }
+      }
+    }
+
+    // 3. Notes / Dietary
+    var notes = '';
+    var dietaryInput = formEl.querySelector('input[name*="intolerances" i], input[name*="diet" i], textarea[name*="diet" i], textarea[name*="message" i], textarea[name*="note" i], input[name*="food" i]');
+    if (dietaryInput && dietaryInput.value) {
+      notes = dietaryInput.value.trim();
+    }
+
+    // 4. Adults & Kids Count
+    var adultsCount = attending === 'yes' ? 1 : 0;
+    var kidsCount = 0;
+
+    var adultsInput = formEl.querySelector('input[name*="adult" i], select[name*="adult" i]');
+    if (adultsInput && adultsInput.value) {
+      var parsedAdults = parseInt(adultsInput.value, 10);
+      if (!isNaN(parsedAdults) && parsedAdults >= 0) adultsCount = parsedAdults;
+    }
+
+    var kidsInput = formEl.querySelector('input[name*="kid" i], input[name*="child" i], select[name*="kid" i], select[name*="child" i]');
+    if (kidsInput && kidsInput.value) {
+      var parsedKids = parseInt(kidsInput.value, 10);
+      if (!isNaN(parsedKids) && parsedKids >= 0) kidsCount = parsedKids;
+    }
+
+    // Auto-parse natural numbers in guest name or notes (e.g. "Hadi & Nour + 4 kids" or "Family of 4")
+    var combinedText = (guestName + ' ' + notes).toLowerCase();
+    var kidMatch = combinedText.match(/(\d+)\s*(kids?|children|child)/i);
+    if (kidMatch && kidMatch[1] && kidsCount === 0) {
+      kidsCount = parseInt(kidMatch[1], 10);
+    }
+    var adultMatch = combinedText.match(/(\d+)\s*(adults?)/i);
+    if (adultMatch && adultMatch[1]) {
+      adultsCount = parseInt(adultMatch[1], 10);
+    } else {
+      var guestMatchBoth = combinedText.match(/(\d+)\s*(guests?|people|persons?)/i);
+      if (guestMatchBoth && guestMatchBoth[1]) {
+        var total = parseInt(guestMatchBoth[1], 10);
+        if (total > kidsCount) {
+          adultsCount = total - kidsCount;
+        }
+      }
+    }
+
+    // 5. Client Slug
+    var clientSlug = 'hadi';
+    try {
+      if (window.__wbg_clientSlug) {
+        clientSlug = window.__wbg_clientSlug;
+      } else {
+        var parentUrl = window.location.href;
+        var m = parentUrl.match(/invite\/([a-z0-9_-]+)/i);
+        if (m && m[1]) clientSlug = m[1];
+      }
+    } catch (e) {}
+
+    var payload = {
+      clientSlug: clientSlug,
+      guestName: guestName,
+      name: guestName,
+      attending: attending,
+      adultsCount: adultsCount,
+      kidsCount: kidsCount,
+      notes: notes,
+      createdAt: new Date().toISOString(),
+      source: 'template_form'
+    };
+
+    // 6. Post to /api/rsvp
+    try {
+      fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(function (err) {
+        console.warn('RSVP fetch warning:', err);
+      });
+    } catch (e) {}
+
+    // 7. Post message to parent
+    try {
+      window.parent.postMessage({
+        type: 'WBG_RSVP_SUBMITTED',
+        data: payload
+      }, '*');
+    } catch (e) {}
+
+    // 8. Show luxury confirmation card
+    showLuxuryConfirmation(formEl, payload);
+  }
+
+  function setupRsvpInterception() {
+    if (window.__wbg_rsvp_intercepted) return;
+    window.__wbg_rsvp_intercepted = true;
+
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form || !form.matches || (!form.matches('form') && !form.closest('form'))) return;
+      var formEl = form.matches('form') ? form : form.closest('form');
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      handleRsvpSubmission(formEl);
+    }, true);
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.t-submit, button[type="submit"], input[type="submit"], .t-btnflex_type_submit');
+      if (!btn) return;
+      var formEl = btn.closest('form');
+      if (!formEl) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      handleRsvpSubmission(formEl);
+    }, true);
+  }
+
   function ensureGoogleFontsLoaded() {
     if (document.getElementById('wbg-google-fonts')) return;
     try {
@@ -3942,6 +4197,7 @@
     setupInteractiveClicks();
     adjustDolceVitaDressCodeLayout();
     setupDolceVitaGalleryControls();
+    setupRsvpInterception();
 
     [50, 150, 300, 600, 1200].forEach(function (delay) {
       setTimeout(function () {
@@ -3949,6 +4205,7 @@
         loadSavedCustomization();
         adjustDolceVitaDressCodeLayout();
         setupDolceVitaGalleryControls();
+        setupRsvpInterception();
       }, delay);
     });
 

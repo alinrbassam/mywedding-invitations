@@ -16,6 +16,7 @@ import { OrderConfiguratorModal } from './components/OrderConfiguratorModal';
 import { TemplatePreviewModal } from './components/TemplatePreviewModal';
 import { LegalModals } from './components/LegalModals';
 import { InvitationTemplateView } from './components/InvitationTemplateView';
+import { CoupleGuestDashboard } from './components/CoupleGuestDashboard';
 
 import { TEMPLATE_PAGES } from './data/templates';
 import { getClientInvite, unpackInviteData } from './data/clientInvites';
@@ -33,6 +34,7 @@ export function App() {
   const [viewingTemplateId, setViewingTemplateId] = useState(null);
   const [viewingCustomData, setViewingCustomData] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
+  const [guestDashboardSlug, setGuestDashboardSlug] = useState(null);
 
   // Check URL pathname and hash on load and listen for changes
   useEffect(() => {
@@ -41,6 +43,36 @@ export function App() {
       const hash = window.location.hash.replace('#', '').trim();
       const urlParams = new URLSearchParams(window.location.search);
 
+      // Check for Couple's Guest Dashboard routes
+      // 1. /invite/:slug/guests or /invite/:slug/rsvp
+      const inviteGuestMatch = path.match(/^invite\/([a-z0-9_-]+)\/(guests|rsvp|tracker)$/i);
+      if (inviteGuestMatch && inviteGuestMatch[1]) {
+        setGuestDashboardSlug(inviteGuestMatch[1]);
+        setViewingTemplateId(null);
+        setClientProfile(null);
+        return;
+      }
+
+      // 2. /guests/:slug or /rsvp/:slug
+      const directGuestMatch = path.match(/^(guests|rsvp|tracker)\/([a-z0-9_-]+)$/i);
+      if (directGuestMatch && directGuestMatch[2]) {
+        setGuestDashboardSlug(directGuestMatch[2]);
+        setViewingTemplateId(null);
+        setClientProfile(null);
+        return;
+      }
+
+      // 3. Query param ?guests=true or ?dashboard=true
+      if (urlParams.get('guests') || urlParams.get('dashboard') || hash === 'guests' || hash === 'rsvp') {
+        const slug = path.startsWith('invite/') ? path.replace('invite/', '') : (path || 'hadi');
+        setGuestDashboardSlug(slug);
+        setViewingTemplateId(null);
+        setClientProfile(null);
+        return;
+      }
+
+      setGuestDashboardSlug(null);
+
       // Check for packed invite data in hash (#d=... or #data=...) or query (?d=... or ?data=...)
       const encodedPayload = urlParams.get('d') || urlParams.get('data') || (hash.startsWith('d=') ? hash.replace('d=', '') : hash.startsWith('data=') ? hash.replace('data=', '') : null);
       if (encodedPayload) {
@@ -48,7 +80,7 @@ export function App() {
         if (unpacked && unpacked.tpl) {
           setViewingTemplateId(unpacked.tpl);
           setViewingCustomData(unpacked.data || null);
-          setClientProfile({ clientName: unpacked.data?.partner1 ? `${unpacked.data.partner1} & ${unpacked.data.partner2}` : 'Client Preview' });
+          setClientProfile({ clientName: unpacked.data?.partner1 ? `${unpacked.data.partner1} & ${unpacked.data.partner2}` : 'Client Preview', slug: 'preview' });
           return;
         }
       }
@@ -153,6 +185,27 @@ export function App() {
     window.history.pushState(null, '', '/');
   };
 
+  // If Couple's Guest Dashboard is active, render it
+  if (guestDashboardSlug) {
+    return (
+      <CoupleGuestDashboard
+        clientSlug={guestDashboardSlug}
+        onBackToHome={() => {
+          setGuestDashboardSlug(null);
+          window.history.pushState(null, '', '/');
+        }}
+        onOpenInvite={(slug) => {
+          setGuestDashboardSlug(null);
+          const client = getClientInvite(slug);
+          setViewingTemplateId(client ? client.templateId : 'dolce-vita');
+          setViewingCustomData(client ? client.customData : null);
+          setClientProfile(client);
+          window.history.pushState(null, '', `/invite/${slug}`);
+        }}
+      />
+    );
+  }
+
   // If a template is actively being viewed, render the self-hosted invitation page!
   if (viewingTemplateId) {
     return (
@@ -161,6 +214,11 @@ export function App() {
         onBack={handleBackFromTemplate}
         initialCustomData={viewingCustomData}
         clientProfile={clientProfile}
+        onOpenDashboard={(slug) => {
+          setViewingTemplateId(null);
+          setGuestDashboardSlug(slug);
+          window.history.pushState(null, '', `/invite/${slug}/guests`);
+        }}
         onOrder={(designId, customData) => {
           handleBackFromTemplate();
           handleOpenOrder('template', designId, customData);
