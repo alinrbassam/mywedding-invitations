@@ -83,14 +83,16 @@ export function Hero({ onOpenOrder, onScrollToSection }) {
 
           {/* Action CTAs */}
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => onOpenOrder('template')}
+            <a
+              href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20creating%20a%20wedding%20invitation"
+              target="_blank"
+              rel="noreferrer"
               className="w-full sm:w-auto px-8 py-4 bg-[#006989] text-white font-bold text-base tracking-wide rounded-full hover:bg-[#005570] transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
             >
               <Sparkles className="w-5 h-5 text-[#cebb78]" />
-              <span>Create My Invitation</span>
+              <span>Inquire on WhatsApp</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </a>
 
             <button
               onClick={() => onScrollToSection('templates')}

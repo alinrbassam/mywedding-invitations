@@ -9,7 +9,7 @@ export const FAQ_ITEMS = [
   },
   {
     question: '3. Is this cheaper than paper invitations?',
-    answer: 'For 50 guests, paper invitations typically cost €150–€400 when you factor in design, high-quality printing, envelopes, and postage. Our digital invitation starts at €65–€75 and works for any number of guests (50 or 50,000) with zero extra per-guest fees.'
+    answer: 'Traditional paper invitations cost hundreds or thousands when you factor in custom stationery, printing, envelopes, and international postage. Our luxury digital invitations offer unlimited guest access with zero per-guest fees, and include real-time RSVP tracking, personalized music, and interactive maps.'
   },
   {
     question: '4. What if we need changes after we see the first version?',

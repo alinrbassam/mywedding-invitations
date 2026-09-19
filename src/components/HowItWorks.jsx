@@ -86,12 +86,14 @@ export function HowItWorks({ onOpenOrder }) {
 
         {/* Bottom CTA */}
         <div className="text-center mt-12">
-          <button
-            onClick={() => onOpenOrder('template')}
-            className="px-8 py-4 bg-[#006989] text-white font-bold text-sm uppercase tracking-wider rounded-full hover:bg-[#005570] transition-all shadow-md hover:shadow-lg"
+          <a
+            href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20a%20wedding%20invitation"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block px-8 py-4 bg-[#006989] text-white font-bold text-sm uppercase tracking-wider rounded-full hover:bg-[#005570] transition-all shadow-md hover:shadow-lg"
           >
-            Start Your Invitation Now
-          </button>
+            Inquire on WhatsApp
+          </a>
         </div>
 
       </div>

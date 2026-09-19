@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TEMPLATES, SAVE_THE_DATES } from '../data/templates';
-import { Eye, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
+import { Eye, Sparkles, ExternalLink, ArrowRight, MessageCircle } from 'lucide-react';
 
 export function TemplateGallery({ onSelectTemplate, onPreviewTemplate, onOpenFullTemplate }) {
   const [filter, setFilter] = useState('all');
@@ -180,7 +180,7 @@ export function TemplateGallery({ onSelectTemplate, onPreviewTemplate, onOpenFul
                 Scratch, Brush & Shake to Reveal Your Date
               </h3>
               <p className="text-slate-600 text-sm sm:text-base mt-2">
-                Special introductory price of just <span className="font-bold text-[#006989]">€35</span> (was €50). Ready in 24–48 hours.
+                Custom interactive animations crafted for your love story. Ready in 24–48 hours.
               </p>
             </div>
 
@@ -214,12 +214,15 @@ export function TemplateGallery({ onSelectTemplate, onPreviewTemplate, onOpenFul
                       <span>Demo</span>
                       <Eye className="w-3 h-3" />
                     </button>
-                    <button
-                      onClick={() => onSelectTemplate(std.id, 'std')}
-                      className="flex-1 py-2 text-center text-xs font-bold bg-[#006989] text-white rounded-lg hover:bg-[#005570]"
+                    <a
+                      href={`https://wa.me/96170710406?text=${encodeURIComponent(`Hello! I would like to inquire about creating an invitation with the "${std.name}" Save the Date design.`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 py-2 text-center text-xs font-bold bg-[#006989] hover:bg-[#005570] text-white rounded-lg flex items-center justify-center gap-1 transition-all shadow-xs"
                     >
-                      Order €35
-                    </button>
+                      <MessageCircle className="w-3.5 h-3.5 fill-white text-[#006989]" />
+                      <span>Inquire</span>
+                    </a>
                   </div>
                 </div>
               ))}

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, ExternalLink, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { X, ExternalLink, Sparkles, Check, ArrowRight, MessageCircle, Eye } from 'lucide-react';
 
 export function TemplatePreviewModal({ template, onClose, onSelectOrder, onOpenFullTemplate }) {
   useEffect(() => {
@@ -88,7 +88,7 @@ export function TemplatePreviewModal({ template, onClose, onSelectOrder, onOpenF
                 {template.badge || 'Bespoke Design'}
               </span>
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-                €75 · One-Time Payment
+                Bespoke Suite
               </span>
             </div>
 
@@ -120,7 +120,7 @@ export function TemplatePreviewModal({ template, onClose, onSelectOrder, onOpenF
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Automated Google Sheets RSVP tracking</span>
+                <span>Smart RSVP attendance & headcount tracker</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -137,20 +137,19 @@ export function TemplatePreviewModal({ template, onClose, onSelectOrder, onOpenF
               }}
               className="w-full py-3 px-6 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-xs uppercase tracking-wider transition-all shadow-xs flex items-center justify-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Try with Your Names &amp; Details</span>
+              <Eye className="w-4 h-4" />
+              <span>View Live Template Demo</span>
             </button>
 
-            <button
-              onClick={() => {
-                onClose();
-                onSelectOrder(template.id, 'template');
-              }}
-              className="w-full py-3.5 px-6 rounded-full bg-[#006989] text-white font-bold text-sm tracking-wide hover:bg-[#005570] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            <a
+              href={`https://wa.me/96170710406?text=${encodeURIComponent(`Hello! I would like to inquire about creating an invitation card with the ${template.name} design.`)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full py-3.5 px-6 rounded-full bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-sm tracking-wide transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
-              <span>Build Invitation with this Style</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+              <MessageCircle className="w-4 h-4 fill-white text-[#25D366]" />
+              <span>Inquire on WhatsApp</span>
+            </a>
 
             <p className="text-[11px] text-center text-slate-500">
               Unlimited revisions included · Ready in 4–7 days (or 24h express)

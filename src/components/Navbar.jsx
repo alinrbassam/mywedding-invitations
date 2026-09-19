@@ -89,22 +89,26 @@ export function Navbar({ onOpenOrder }) {
             >
               <MessageCircle className="w-5 h-5" />
             </a>
-            <button
-              onClick={() => onOpenOrder('template')}
+            <a
+              href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20a%20wedding%20invitation"
+              target="_blank"
+              rel="noreferrer"
               className="ml-2 px-4 py-2 bg-[#006989] text-white text-xs uppercase tracking-wider font-bold rounded-full hover:bg-[#005570] transition-all shadow-sm hover:shadow-md"
             >
-              Order Now
-            </button>
+              Inquire Now
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={() => onOpenOrder('template')}
+            <a
+              href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20a%20wedding%20invitation"
+              target="_blank"
+              rel="noreferrer"
               className="px-3 py-1.5 bg-[#006989] text-white text-xs font-bold rounded-full"
             >
-              Order
-            </button>
+              Inquire
+            </a>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg text-[#08004b] hover:bg-black/5 focus:outline-none"
@@ -149,15 +153,15 @@ export function Navbar({ onOpenOrder }) {
                 <MessageCircle className="w-5 h-5" />
               </a>
             </div>
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                onOpenOrder('template');
-              }}
-              className="px-5 py-2.5 bg-[#006989] text-white text-sm font-bold rounded-xl"
+            <a
+              href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20a%20wedding%20invitation"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="px-5 py-2.5 bg-[#006989] text-white text-sm font-bold rounded-xl text-center"
             >
-              Create Invitation
-            </button>
+              Inquire on WhatsApp
+            </a>
           </div>
         </div>
       )}

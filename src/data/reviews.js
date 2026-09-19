@@ -50,7 +50,7 @@ export const WHATSAPP_TESTIMONIALS = [
     from: 'Sophie & Liam',
     time: '11:40',
     date: 'Last week',
-    text: 'Our grandparents who are in their late 80s figured out the RSVP in literally 30 seconds. So glad we went digital instead of spending €600 on paper prints!'
+    text: 'Our grandparents who are in their late 80s figured out the RSVP in literally 30 seconds. So glad we went digital instead of spending a fortune on traditional paper prints!'
   }
 ];
 

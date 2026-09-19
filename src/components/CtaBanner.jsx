@@ -26,13 +26,15 @@ export function CtaBanner({ onOpenOrder, onScrollToSection }) {
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={() => onOpenOrder('template')}
+              <a
+                href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20creating%20a%20wedding%20invitation"
+                target="_blank"
+                rel="noreferrer"
                 className="w-full sm:w-auto px-8 py-4 bg-[#cebb78] hover:bg-[#dece88] text-black font-bold text-sm uppercase tracking-wider rounded-full transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
               >
-                <span>Begin Your Experience</span>
+                <span>Inquire on WhatsApp</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </a>
 
               <button
                 onClick={() => onScrollToSection('templates')}

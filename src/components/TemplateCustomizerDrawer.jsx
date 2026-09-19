@@ -4560,11 +4560,11 @@ export function TemplateCustomizerDrawer({
         )}
 
         <button
-          onClick={() => onSaveAndOrder(customData)}
+          onClick={() => onSaveAndOrder && onSaveAndOrder(customData)}
           className="w-full py-3 sm:py-3.5 px-4 sm:px-5 rounded-full bg-[#006989] hover:bg-[#005570] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
         >
-          <ShoppingBag className="w-4 h-4" />
-          <span>Save &amp; Continue to Order ({templateInfo?.price || '€75'})</span>
+          <Check className="w-4 h-4" />
+          <span>Save Changes</span>
         </button>
 
         <div className="flex items-center justify-between text-[11px] px-1">

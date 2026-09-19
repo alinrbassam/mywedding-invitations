@@ -74,12 +74,14 @@ export function PhoneShowcase({ onOpenOrder }) {
             </div>
 
             <div className="pt-4">
-              <button
-                onClick={() => onOpenOrder('template')}
-                className="px-8 py-3.5 bg-[#006989] text-white font-bold rounded-full hover:bg-[#005570] transition-all shadow-md hover:shadow-lg"
+              <a
+                href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20the%20Blossom%20%26%20Oud%20design"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block px-8 py-3.5 bg-[#006989] text-white font-bold rounded-full hover:bg-[#005570] transition-all shadow-md hover:shadow-lg"
               >
-                Personalize This Design
-              </button>
+                Inquire on WhatsApp
+              </a>
             </div>
           </div>
 

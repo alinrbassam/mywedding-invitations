@@ -8,27 +8,27 @@ import { TemplateCustomizerDrawer } from './TemplateCustomizerDrawer';
 import { packInviteData } from '../data/clientInvites';
 
 const TEMPLATE_INFO = {
-  'blossom-oud': { id: 'blossom-oud', name: 'Blossom & Oud', price: '€75', url: '/blossomoud.html', type: 'template' },
-  'blossomoud': { id: 'blossom-oud', name: 'Blossom & Oud', price: '€75', url: '/blossomoud.html', type: 'template' },
-  'dolce-vita': { id: 'dolce-vita', name: 'Dolce Vita', price: '€75', url: '/dolcevita.html', type: 'template' },
-  'dolcevita': { id: 'dolce-vita', name: 'Dolce Vita', price: '€75', url: '/dolcevita.html', type: 'template' },
-  'timeless-grace': { id: 'timeless-grace', name: 'Timeless Grace', price: '€75', url: '/timelessgrace.html', type: 'template' },
-  'timelessgrace': { id: 'timeless-grace', name: 'Timeless Grace', price: '€75', url: '/timelessgrace.html', type: 'template' },
-  'vibrant-vows': { id: 'vibrant-vows', name: 'Vibrant Vows', price: '€75', url: '/vibrantvows.html', type: 'template' },
-  'vibrantvows': { id: 'vibrant-vows', name: 'Vibrant Vows', price: '€75', url: '/vibrantvows.html', type: 'template' },
-  'destination-love': { id: 'destination-love', name: 'Destination Love', price: '€75', url: '/destinationlove.html', type: 'template' },
-  'destinationlove': { id: 'destination-love', name: 'Destination Love', price: '€75', url: '/destinationlove.html', type: 'template' },
-  'eternal-romance': { id: 'eternal-romance', name: 'Eternal Romance', price: '€75', url: '/eternalromance.html', type: 'template' },
-  'eternalromance': { id: 'eternal-romance', name: 'Eternal Romance', price: '€75', url: '/eternalromance.html', type: 'template' },
-  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', price: '€75', url: '/royalgold.html', type: 'template' },
-  'royalgold': { id: 'royal-gold', name: 'Royal Gold', price: '€75', url: '/royalgold.html', type: 'template' },
-  'minimalist': { id: 'minimalist', name: 'Minimalist', price: '€75', url: '/minimalist.html', type: 'template' },
-  'golden-secret': { id: 'golden-secret', name: 'Golden Secret', price: '€35', url: '/goldensecret.html', type: 'std' },
-  'goldensecret': { id: 'golden-secret', name: 'Golden Secret', price: '€35', url: '/goldensecret.html', type: 'std' },
-  'petal-promise': { id: 'petal-promise', name: 'Petal Promise', price: '€35', url: '/petalpromise.html', type: 'std' },
-  'petalpromise': { id: 'petal-promise', name: 'Petal Promise', price: '€35', url: '/petalpromise.html', type: 'std' },
-  'captured-love': { id: 'captured-love', name: 'Captured Love', price: '€35', url: '/capturedlove.html', type: 'std' },
-  'capturedlove': { id: 'captured-love', name: 'Captured Love', price: '€35', url: '/capturedlove.html', type: 'std' }
+  'blossom-oud': { id: 'blossom-oud', name: 'Blossom & Oud', price: 'Bespoke Suite', url: '/blossomoud.html', type: 'template' },
+  'blossomoud': { id: 'blossom-oud', name: 'Blossom & Oud', price: 'Bespoke Suite', url: '/blossomoud.html', type: 'template' },
+  'dolce-vita': { id: 'dolce-vita', name: 'Dolce Vita', price: 'Bespoke Suite', url: '/dolcevita.html', type: 'template' },
+  'dolcevita': { id: 'dolce-vita', name: 'Dolce Vita', price: 'Bespoke Suite', url: '/dolcevita.html', type: 'template' },
+  'timeless-grace': { id: 'timeless-grace', name: 'Timeless Grace', price: 'Bespoke Suite', url: '/timelessgrace.html', type: 'template' },
+  'timelessgrace': { id: 'timeless-grace', name: 'Timeless Grace', price: 'Bespoke Suite', url: '/timelessgrace.html', type: 'template' },
+  'vibrant-vows': { id: 'vibrant-vows', name: 'Vibrant Vows', price: 'Bespoke Suite', url: '/vibrantvows.html', type: 'template' },
+  'vibrantvows': { id: 'vibrant-vows', name: 'Vibrant Vows', price: 'Bespoke Suite', url: '/vibrantvows.html', type: 'template' },
+  'destination-love': { id: 'destination-love', name: 'Destination Love', price: 'Bespoke Suite', url: '/destinationlove.html', type: 'template' },
+  'destinationlove': { id: 'destination-love', name: 'Destination Love', price: 'Bespoke Suite', url: '/destinationlove.html', type: 'template' },
+  'eternal-romance': { id: 'eternal-romance', name: 'Eternal Romance', price: 'Bespoke Suite', url: '/eternalromance.html', type: 'template' },
+  'eternalromance': { id: 'eternal-romance', name: 'Eternal Romance', price: 'Bespoke Suite', url: '/eternalromance.html', type: 'template' },
+  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', price: 'Bespoke Suite', url: '/royalgold.html', type: 'template' },
+  'royalgold': { id: 'royal-gold', name: 'Royal Gold', price: 'Bespoke Suite', url: '/royalgold.html', type: 'template' },
+  'minimalist': { id: 'minimalist', name: 'Minimalist', price: 'Bespoke Suite', url: '/minimalist.html', type: 'template' },
+  'golden-secret': { id: 'golden-secret', name: 'Golden Secret', price: 'Bespoke Suite', url: '/goldensecret.html', type: 'std' },
+  'goldensecret': { id: 'golden-secret', name: 'Golden Secret', price: 'Bespoke Suite', url: '/goldensecret.html', type: 'std' },
+  'petal-promise': { id: 'petal-promise', name: 'Petal Promise', price: 'Bespoke Suite', url: '/petalpromise.html', type: 'std' },
+  'petalpromise': { id: 'petal-promise', name: 'Petal Promise', price: 'Bespoke Suite', url: '/petalpromise.html', type: 'std' },
+  'captured-love': { id: 'captured-love', name: 'Captured Love', price: 'Bespoke Suite', url: '/capturedlove.html', type: 'std' },
+  'capturedlove': { id: 'captured-love', name: 'Captured Love', price: 'Bespoke Suite', url: '/capturedlove.html', type: 'std' }
 };
 
 const DEFAULT_TEMPLATE_DATA = {
@@ -2445,7 +2445,6 @@ export function InvitationTemplateView({
                   isUpdating={isUpdating}
                   onSaveAndOrder={(data) => {
                     setIsCustomizerOpen(false);
-                    onOrder(info.id, data);
                   }}
                 />
               </div>
@@ -2604,7 +2603,6 @@ export function InvitationTemplateView({
           onMobileSheetModeChange={setMobileSheetMode}
           onSaveAndOrder={(data) => {
             setIsCustomizerOpen(false);
-            onOrder(info.id, data);
           }}
         />
       </div>
@@ -2663,7 +2661,6 @@ export function InvitationTemplateView({
             isUpdating={isUpdating}
             onSaveAndOrder={(data) => {
               setIsCustomizerOpen(false);
-              onOrder(info.id, data);
             }}
           />
         </div>

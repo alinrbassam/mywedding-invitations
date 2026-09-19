@@ -116,12 +116,14 @@ export function WhatsIncluded({ onOpenOrder }) {
             </div>
 
             <div className="shrink-0">
-              <button
-                onClick={() => onOpenOrder('template')}
-                className="px-8 py-4 bg-white text-[#08004b] font-bold text-sm uppercase tracking-wider rounded-full hover:bg-[#cebb78] hover:text-black transition-all shadow-lg hover:shadow-xl hover:scale-105"
+              <a
+                href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20a%20wedding%20invitation"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block px-8 py-4 bg-white text-[#08004b] font-bold text-sm uppercase tracking-wider rounded-full hover:bg-[#cebb78] hover:text-black transition-all shadow-lg hover:shadow-xl hover:scale-105"
               >
-                Build My Invitation
-              </button>
+                Inquire on WhatsApp
+              </a>
             </div>
           </div>
         </div>

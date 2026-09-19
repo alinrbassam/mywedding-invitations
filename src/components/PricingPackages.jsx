@@ -18,7 +18,7 @@ export function PricingPackages({ onOpenOrder }) {
             Choose Your Design Style
           </h2>
           <p className="mt-4 text-slate-600 text-base sm:text-lg">
-            Transparent one-time pricing. No subscriptions, no guest limits, no stress.
+            Bespoke luxury invitations. No subscriptions, no guest limits, no stress.
           </p>
         </div>
 
@@ -31,8 +31,7 @@ export function PricingPackages({ onOpenOrder }) {
             return (
               <div
                 key={pkg.id}
-                onClick={() => onOpenOrder(pkg.id)}
-                className={`group relative rounded-3xl p-8 cursor-pointer transition-all duration-300 flex flex-col justify-between ${
+                className={`group relative rounded-3xl p-8 transition-all duration-300 flex flex-col justify-between ${
                   isFeatured
                     ? 'bg-gradient-to-b from-[#f2f9fd] via-[#f7fcfe] to-white border-2 border-[#006989] shadow-hover lg:-translate-y-2'
                     : isCustom
