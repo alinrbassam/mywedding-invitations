@@ -44,8 +44,16 @@ export function Hero({ onOpenOrder, onScrollToSection }) {
     <section className="pt-28 sm:pt-36 pb-12 sm:pb-20 overflow-hidden bg-gradient-to-b from-[#ededed]/60 via-[#fbfbfb] to-[#fbfbfb]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Top Trust Pill */}
-        <div className="flex justify-center mb-6">
+        {/* Top Trust Pill & Brand Emblem */}
+        <div className="flex flex-col items-center gap-2.5 mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#be9667]/15 border border-[#be9667]/30 text-xs font-semibold text-[#8b6b3e] shadow-2xs">
+            <span className="font-serif tracking-widest uppercase">Laylitna</span>
+            <span className="text-[#be9667]">·</span>
+            <span className="font-serif" dir="rtl">ليلتنا</span>
+            <span className="text-[#be9667]">·</span>
+            <span className="text-[11px] tracking-wide uppercase font-sans">Weddings in Lebanon & Worldwide</span>
+          </div>
+
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white shadow-sm border border-slate-200/80 text-xs sm:text-sm font-medium text-slate-700">
             <span className="flex text-amber-400">
               {[...Array(5)].map((_, i) => (

@@ -28,7 +28,7 @@ export const GOOGLE_REVIEWS = [
     event: 'Wedding in Dubai, UAE',
     date: '2 months ago',
     rating: 5,
-    text: 'We chose the Blossom & Oud template with the Arabic and English dual language feature. The typography, gold detailing, and background oud music gave our guests literal goosebumps. Pure luxury.',
+    text: 'We chose the Amber & Silk template with the Arabic and English dual language feature. The typography, gold detailing, and background oud music gave our guests literal goosebumps. Pure luxury.',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80'
   }
 ];
@@ -57,12 +57,12 @@ export const WHATSAPP_TESTIMONIALS = [
 export const INSTAGRAM_TESTIMONIALS = [
   {
     handle: '@charlotte.and.ben',
-    text: 'The most magical wedding invitation ever created ✨💌 @webgency_invitations you turned our dream vision into reality! Everyone check your texts!!',
+    text: 'The most magical wedding invitation ever created ✨💌 Laylitna Invitations you turned our dream vision into reality! Everyone check your texts!!',
     likes: '342 likes'
   },
   {
     handle: '@amelia_events_paris',
-    text: 'As a luxury wedding planner, I recommend Webgency to all my couples. Instant updates, zero printing delays, and stunning aesthetics every time 🤍',
+    text: 'As a luxury wedding planner, I recommend Laylitna to all my couples. Instant updates, zero printing delays, and stunning aesthetics every time 🤍',
     likes: '518 likes'
   }
 ];

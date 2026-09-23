@@ -6,29 +6,30 @@ import {
 } from 'lucide-react';
 import { TemplateCustomizerDrawer } from './TemplateCustomizerDrawer';
 import { packInviteData } from '../data/clientInvites';
+import { isSessionAdmin, authenticateAdmin, deauthenticateAdmin } from '../config/adminAuth';
 
 const TEMPLATE_INFO = {
-  'blossom-oud': { id: 'blossom-oud', name: 'Blossom & Oud', price: 'Bespoke Suite', url: '/blossomoud.html', type: 'template' },
-  'blossomoud': { id: 'blossom-oud', name: 'Blossom & Oud', price: 'Bespoke Suite', url: '/blossomoud.html', type: 'template' },
-  'dolce-vita': { id: 'dolce-vita', name: 'Dolce Vita', price: 'Bespoke Suite', url: '/dolcevita.html', type: 'template' },
-  'dolcevita': { id: 'dolce-vita', name: 'Dolce Vita', price: 'Bespoke Suite', url: '/dolcevita.html', type: 'template' },
-  'timeless-grace': { id: 'timeless-grace', name: 'Timeless Grace', price: 'Bespoke Suite', url: '/timelessgrace.html', type: 'template' },
-  'timelessgrace': { id: 'timeless-grace', name: 'Timeless Grace', price: 'Bespoke Suite', url: '/timelessgrace.html', type: 'template' },
-  'vibrant-vows': { id: 'vibrant-vows', name: 'Vibrant Vows', price: 'Bespoke Suite', url: '/vibrantvows.html', type: 'template' },
-  'vibrantvows': { id: 'vibrant-vows', name: 'Vibrant Vows', price: 'Bespoke Suite', url: '/vibrantvows.html', type: 'template' },
-  'destination-love': { id: 'destination-love', name: 'Destination Love', price: 'Bespoke Suite', url: '/destinationlove.html', type: 'template' },
-  'destinationlove': { id: 'destination-love', name: 'Destination Love', price: 'Bespoke Suite', url: '/destinationlove.html', type: 'template' },
-  'eternal-romance': { id: 'eternal-romance', name: 'Eternal Romance', price: 'Bespoke Suite', url: '/eternalromance.html', type: 'template' },
-  'eternalromance': { id: 'eternal-romance', name: 'Eternal Romance', price: 'Bespoke Suite', url: '/eternalromance.html', type: 'template' },
-  'royal-gold': { id: 'royal-gold', name: 'Royal Gold', price: 'Bespoke Suite', url: '/royalgold.html', type: 'template' },
-  'royalgold': { id: 'royal-gold', name: 'Royal Gold', price: 'Bespoke Suite', url: '/royalgold.html', type: 'template' },
-  'minimalist': { id: 'minimalist', name: 'Minimalist', price: 'Bespoke Suite', url: '/minimalist.html', type: 'template' },
-  'golden-secret': { id: 'golden-secret', name: 'Golden Secret', price: 'Bespoke Suite', url: '/goldensecret.html', type: 'std' },
-  'goldensecret': { id: 'golden-secret', name: 'Golden Secret', price: 'Bespoke Suite', url: '/goldensecret.html', type: 'std' },
-  'petal-promise': { id: 'petal-promise', name: 'Petal Promise', price: 'Bespoke Suite', url: '/petalpromise.html', type: 'std' },
-  'petalpromise': { id: 'petal-promise', name: 'Petal Promise', price: 'Bespoke Suite', url: '/petalpromise.html', type: 'std' },
-  'captured-love': { id: 'captured-love', name: 'Captured Love', price: 'Bespoke Suite', url: '/capturedlove.html', type: 'std' },
-  'capturedlove': { id: 'captured-love', name: 'Captured Love', price: 'Bespoke Suite', url: '/capturedlove.html', type: 'std' }
+  'blossom-oud': { id: 'blossom-oud', name: 'Amber & Silk', price: 'Bespoke Suite', url: '/blossomoud.html', type: 'template' },
+  'blossomoud': { id: 'blossom-oud', name: 'Amber & Silk', price: 'Bespoke Suite', url: '/blossomoud.html', type: 'template' },
+  'dolce-vita': { id: 'dolce-vita', name: 'Riviera Romance', price: 'Bespoke Suite', url: '/dolcevita.html', type: 'template' },
+  'dolcevita': { id: 'dolce-vita', name: 'Riviera Romance', price: 'Bespoke Suite', url: '/dolcevita.html', type: 'template' },
+  'timeless-grace': { id: 'timeless-grace', name: 'Lumière Royale', price: 'Bespoke Suite', url: '/timelessgrace.html', type: 'template' },
+  'timelessgrace': { id: 'timeless-grace', name: 'Lumière Royale', price: 'Bespoke Suite', url: '/timelessgrace.html', type: 'template' },
+  'vibrant-vows': { id: 'vibrant-vows', name: 'Scarlet Symphony', price: 'Bespoke Suite', url: '/vibrantvows.html', type: 'template' },
+  'vibrantvows': { id: 'vibrant-vows', name: 'Scarlet Symphony', price: 'Bespoke Suite', url: '/vibrantvows.html', type: 'template' },
+  'destination-love': { id: 'destination-love', name: "Voyage d'Amour", price: 'Bespoke Suite', url: '/destinationlove.html', type: 'template' },
+  'destinationlove': { id: 'destination-love', name: "Voyage d'Amour", price: 'Bespoke Suite', url: '/destinationlove.html', type: 'template' },
+  'eternal-romance': { id: 'eternal-romance', name: 'Champagne Muse', price: 'Bespoke Suite', url: '/eternalromance.html', type: 'template' },
+  'eternalromance': { id: 'eternal-romance', name: 'Champagne Muse', price: 'Bespoke Suite', url: '/eternalromance.html', type: 'template' },
+  'royal-gold': { id: 'royal-gold', name: 'Celestial Midnight', price: 'Bespoke Suite', url: '/royalgold.html', type: 'template' },
+  'royalgold': { id: 'royal-gold', name: 'Celestial Midnight', price: 'Bespoke Suite', url: '/royalgold.html', type: 'template' },
+  'minimalist': { id: 'minimalist', name: 'Atelier Botanica', price: 'Bespoke Suite', url: '/minimalist.html', type: 'template' },
+  'golden-secret': { id: 'golden-secret', name: 'Gilded Mystery', price: 'Bespoke Suite', url: '/goldensecret.html', type: 'std' },
+  'goldensecret': { id: 'golden-secret', name: 'Gilded Mystery', price: 'Bespoke Suite', url: '/goldensecret.html', type: 'std' },
+  'petal-promise': { id: 'petal-promise', name: 'Rose Whisper', price: 'Bespoke Suite', url: '/petalpromise.html', type: 'std' },
+  'petalpromise': { id: 'petal-promise', name: 'Rose Whisper', price: 'Bespoke Suite', url: '/petalpromise.html', type: 'std' },
+  'captured-love': { id: 'captured-love', name: 'Vintage Polaroid', price: 'Bespoke Suite', url: '/capturedlove.html', type: 'std' },
+  'capturedlove': { id: 'captured-love', name: 'Vintage Polaroid', price: 'Bespoke Suite', url: '/capturedlove.html', type: 'std' }
 };
 
 const DEFAULT_TEMPLATE_DATA = {
@@ -528,19 +529,19 @@ export function InvitationTemplateView({
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window === 'undefined') return false;
     const urlParams = new URLSearchParams(window.location.search);
-    const hash = window.location.hash || '';
-    if (urlParams.get('admin') === 'true' || urlParams.get('edit') === 'true' || hash.includes('admin=true')) {
-      sessionStorage.setItem('wbg_admin_auth', 'true');
-      return true;
-    }
     if (urlParams.get('admin') === 'false' || urlParams.get('preview') === 'true') {
-      sessionStorage.removeItem('wbg_admin_auth');
-      localStorage.removeItem('wbg_admin_mode');
+      deauthenticateAdmin();
       return false;
     }
-    return sessionStorage.getItem('wbg_admin_auth') === 'true';
+    return isSessionAdmin();
   });
-  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash || '';
+    // If admin is explicitly requested via URL and user isn't logged in, prompt for password!
+    return (urlParams.get('admin') === 'true' || urlParams.get('edit') === 'true' || hash.includes('admin=true')) && !isSessionAdmin();
+  });
   const [adminPasscode, setAdminPasscode] = useState('');
   const [passcodeError, setPasscodeError] = useState('');
   const [shareToast, setShareToast] = useState('');
@@ -2129,8 +2130,7 @@ export function InvitationTemplateView({
               {/* Exit Studio Button */}
               <button
                 onClick={() => {
-                  sessionStorage.removeItem('wbg_admin_auth');
-                  localStorage.removeItem('wbg_admin_mode');
+                  deauthenticateAdmin();
                   setIsAdmin(false);
                   setIsCustomizerOpen(false);
                   broadcastCustomization({ ...customData, isAdmin: false }, false);
@@ -2995,15 +2995,14 @@ export function InvitationTemplateView({
               onSubmit={(e) => {
                 e.preventDefault();
                 const code = adminPasscode.trim();
-                if (code === '1234' || code === 'admin' || code.length > 0) {
+                if (authenticateAdmin(code)) {
                   setIsAdmin(true);
-                  sessionStorage.setItem('wbg_admin_auth', 'true');
                   setIsUnlockModalOpen(false);
                   setPasscodeError('');
                   setAdminPasscode('');
                   broadcastCustomization(customData, true);
                 } else {
-                  setPasscodeError('Please enter your passcode');
+                  setPasscodeError('Incorrect password. Please try again.');
                 }
               }}
               className="space-y-3 pt-1"

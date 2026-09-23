@@ -1,7 +1,7 @@
 export const TEMPLATES = [
   {
     id: 'blossom-oud',
-    name: 'Blossom & Oud',
+    name: 'Amber & Silk',
     desc: 'Inspired by Arabian luxury and timeless love.',
     badge: 'NEW ✨',
     badgeType: 'new',
@@ -12,7 +12,7 @@ export const TEMPLATES = [
   },
   {
     id: 'dolce-vita',
-    name: 'Dolce Vita',
+    name: 'Riviera Romance',
     desc: 'Italian elegance meets modern romance.',
     badge: 'Most Popular ✨',
     badgeType: 'popular',
@@ -23,7 +23,7 @@ export const TEMPLATES = [
   },
   {
     id: 'timeless-grace',
-    name: 'Timeless Grace',
+    name: 'Lumière Royale',
     desc: 'Radiant gold, soft ivory, gentle grace.',
     badge: 'NEW ✨',
     badgeType: 'new',
@@ -34,7 +34,7 @@ export const TEMPLATES = [
   },
   {
     id: 'vibrant-vows',
-    name: 'Vibrant Vows',
+    name: 'Scarlet Symphony',
     desc: 'Bold colour, full of joy and energy with free venue illustration.',
     badge: 'NEW · Free venue illustration',
     badgeType: 'new',
@@ -45,7 +45,7 @@ export const TEMPLATES = [
   },
   {
     id: 'destination-love',
-    name: 'Destination Love',
+    name: 'Voyage d\'Amour',
     desc: 'Perfect for destination weddings across the globe.',
     badge: 'Destination ✈️',
     badgeType: 'neutral',
@@ -56,7 +56,7 @@ export const TEMPLATES = [
   },
   {
     id: 'eternal-romance',
-    name: 'Eternal Romance',
+    name: 'Champagne Muse',
     desc: 'Timeless, graceful, soft, and warm aesthetic.',
     badge: 'Client Favorite 🤍',
     badgeType: 'favorite',
@@ -67,7 +67,7 @@ export const TEMPLATES = [
   },
   {
     id: 'royal-gold',
-    name: 'Royal Gold',
+    name: 'Celestial Midnight',
     desc: 'Opulent gold with classical refinement and regal monogram.',
     badge: 'Regal 👑',
     badgeType: 'neutral',
@@ -78,7 +78,7 @@ export const TEMPLATES = [
   },
   {
     id: 'minimalist',
-    name: 'Minimalist',
+    name: 'Atelier Botanica',
     desc: 'Clean lines, typography-focused, perfectly refined.',
     badge: 'Minimal 🌿',
     badgeType: 'neutral',
@@ -92,7 +92,7 @@ export const TEMPLATES = [
 export const SAVE_THE_DATES = [
   {
     id: 'golden-secret',
-    name: 'Golden Secret',
+    name: 'Gilded Mystery',
     desc: 'Scratch gold foil to reveal your date',
     badge: 'Interactive Foil',
     demo: '/goldensecret.html',
@@ -100,7 +100,7 @@ export const SAVE_THE_DATES = [
   },
   {
     id: 'petal-promise',
-    name: 'Petal Promise',
+    name: 'Rose Whisper',
     desc: 'Brush rose petals to reveal your date',
     badge: 'Petal Reveal',
     demo: '/petalpromise.html',
@@ -108,7 +108,7 @@ export const SAVE_THE_DATES = [
   },
   {
     id: 'captured-love',
-    name: 'Captured Love',
+    name: 'Vintage Polaroid',
     desc: 'Shake to reveal your polaroid moment',
     badge: 'Polaroid Shake',
     demo: '/capturedlove.html',

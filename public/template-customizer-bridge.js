@@ -1,5 +1,5 @@
 /**
- * Webgency Invitations - Template Customizer Bridge
+ * Laylitna Invitations - Template Customizer Bridge
  * Enables instantaneous, on-the-spot 2-way visual personalization
  * across all 12 wedding templates.
  */

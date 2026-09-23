@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { GOOGLE_REVIEWS, WHATSAPP_TESTIMONIALS, INSTAGRAM_TESTIMONIALS } from '../data/reviews';
+import { GOOGLE_REVIEWS, WHATSAPP_TESTIMONIALS } from '../data/reviews';
 import { Star, MessageCircle, Heart, CheckCircle } from 'lucide-react';
-import { InstagramIcon } from './Icons';
 
 export function Reviews() {
-  const [activeTab, setActiveTab] = useState('google'); // 'google', 'whatsapp', 'instagram'
+  const [activeTab, setActiveTab] = useState('google'); // 'google', 'whatsapp'
 
   return (
     <section id="reviews" className="py-20 sm:py-28 bg-[#fbfbfb] scroll-mt-16">
@@ -65,17 +64,6 @@ export function Reviews() {
               <MessageCircle className="w-3.5 h-3.5" />
               WhatsApp Praises
             </button>
-            <button
-              onClick={() => setActiveTab('instagram')}
-              className={`px-5 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide transition-all flex items-center gap-1.5 ${
-                activeTab === 'instagram'
-                  ? 'bg-[#E1306C] text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <InstagramIcon className="w-3.5 h-3.5" />
-              Instagram
-            </button>
           </div>
         </div>
 
@@ -135,38 +123,6 @@ export function Reviews() {
                 </p>
                 <div className="text-right mt-2 text-[10px] text-emerald-700 font-bold">
                   ✓✓ Delivered via WhatsApp
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tab Content: Instagram Mentions */}
-        {activeTab === 'instagram' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {INSTAGRAM_TESTIMONIALS.map((post, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card flex flex-col justify-between"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 to-fuchsia-600 flex items-center justify-center text-white font-bold text-xs">
-                    <InstagramIcon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-sm text-slate-900 block">{post.handle}</span>
-                    <span className="text-[11px] text-slate-400">Tagged @webgency_invitations</span>
-                  </div>
-                </div>
-                <p className="text-slate-700 text-sm leading-relaxed mb-4">
-                  {post.text}
-                </p>
-                <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-100">
-                  <span className="flex items-center gap-1 text-rose-600 font-semibold">
-                    <Heart className="w-3.5 h-3.5 fill-current" />
-                    {post.likes}
-                  </span>
-                  <span>Verified Instagram Post</span>
                 </div>
               </div>
             ))}

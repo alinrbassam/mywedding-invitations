@@ -1,8 +1,7 @@
 import React from 'react';
-import { MessageCircle, Heart } from 'lucide-react';
-import { InstagramIcon } from './Icons';
+import { MessageCircle, Heart, Lock } from 'lucide-react';
 
-export function Footer({ onScrollToSection, onOpenLegal }) {
+export function Footer({ onScrollToSection, onOpenLegal, onOpenAdminLogin }) {
   return (
     <footer className="bg-[#ededed] text-slate-700 py-16 border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,36 +11,40 @@ export function Footer({ onScrollToSection, onOpenLegal }) {
           {/* Brand Col */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#08004b] flex items-center justify-center text-white font-serif text-lg font-bold">
-                W
+              <img
+                src="/laylitna-logo.png"
+                alt="Laylitna"
+                className="w-11 h-11 rounded-full object-cover shadow-xs border border-[#be9667]/40"
+              />
+              <div className="flex flex-col">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-serif text-2xl font-bold text-[#08004b]">
+                    Laylitna
+                  </span>
+                  <span className="text-sm font-serif text-[#006989] font-medium" dir="rtl">
+                    ليلتنا
+                  </span>
+                </div>
+                <span className="text-[10px] tracking-[0.18em] uppercase font-semibold text-[#006989]">
+                  Digital Invitations · Weddings in Lebanon
+                </span>
               </div>
-              <span className="font-serif text-2xl font-bold text-[#08004b]">
-                Webgency Invitations
-              </span>
             </div>
 
             <p className="text-sm text-slate-600 max-w-sm leading-relaxed">
-              Luxury digital wedding & celebration invitations with smart RSVP tracking, interactive maps, music, and unlimited revisions. Designed with love for couples worldwide.
+              Luxury bespoke digital wedding & celebration invitations with smart RSVP tracking, interactive maps, music, and unlimited revisions. Designed with love for weddings in Lebanon and couples worldwide.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
               <a
-                href="https://www.instagram.com/webgency_invitations/"
-                target="_blank"
-                rel="noreferrer"
-                className="w-9 h-9 rounded-full bg-white shadow-xs border border-slate-300 flex items-center justify-center text-slate-600 hover:text-[#006989] hover:border-[#006989] transition-all"
-                title="Instagram"
-              >
-                <InstagramIcon className="w-4 h-4" />
-              </a>
-              <a
                 href="https://wa.me/96170710406"
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-full bg-white shadow-xs border border-slate-300 flex items-center justify-center text-slate-600 hover:text-[#25D366] hover:border-[#25D366] transition-all"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-xs border border-slate-300 text-slate-700 hover:text-[#25D366] hover:border-[#25D366] transition-all text-xs font-semibold"
                 title="WhatsApp"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                <span>+961 70 710 406</span>
               </a>
             </div>
           </div>
@@ -123,7 +126,7 @@ export function Footer({ onScrollToSection, onOpenLegal }) {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © 2026 Webgency. All rights reserved.
+            © 2026 Laylitna. All rights reserved.
           </div>
 
           <div className="flex items-center gap-4">
@@ -139,6 +142,15 @@ export function Footer({ onScrollToSection, onOpenLegal }) {
               className="hover:text-[#006989] transition-colors"
             >
               Terms & Conditions
+            </button>
+            <span>|</span>
+            <button
+              onClick={onOpenAdminLogin}
+              className="hover:text-[#006989] transition-colors flex items-center gap-1 text-slate-400 hover:text-slate-600"
+              title="Admin Studio Sign In"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Admin</span>
             </button>
           </div>
         </div>

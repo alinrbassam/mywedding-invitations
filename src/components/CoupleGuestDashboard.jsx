@@ -274,7 +274,7 @@ export function CoupleGuestDashboard({ clientSlug = 'hadi', onBackToHome, onOpen
               <button 
                 onClick={onBackToHome}
                 className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
-                title="Back to Webgency Studio"
+                title="Back to Laylitna Studio"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
@@ -798,7 +798,7 @@ export function CoupleGuestDashboard({ clientSlug = 'hadi', onBackToHome, onOpen
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-6 text-center text-xs text-slate-400">
-        <p>Webgency Luxury Wedding Invitations • Powered by Webgency Studio</p>
+        <p>Laylitna Luxury Wedding Invitations • Powered by Laylitna Studio</p>
       </footer>
 
     </div>

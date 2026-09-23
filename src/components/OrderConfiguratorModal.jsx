@@ -267,7 +267,7 @@ export function OrderConfiguratorModal({
       : (stdDetails.p1 ? `${stdDetails.p1} & ${stdDetails.p2}` : '');
 
     const lines = [
-      `*New Luxury Invitation Order* 💍`,
+      `*New Luxury Invitation Inquiry* 💍`,
       `---------------------------------`,
       `*Package:* ${pkgType === 'std' ? 'Save the Date' : pkgType === 'custom' ? 'Custom Invitation' : 'Template Invitation'}`,
       `*Design Style:* ${designName}`,
@@ -276,12 +276,11 @@ export function OrderConfiguratorModal({
       `*Customer:* ${pkgType === 'std' ? stdDetails.name : tplDetails.name}`,
       `*Email:* ${pkgType === 'std' ? stdDetails.email : tplDetails.email}`,
       `*Event Date:* ${pkgType === 'std' ? stdDetails.date : tplDetails.eventDate || 'TBD'}`,
-      `*Total Price:* €${calculation.total}`,
       `---------------------------------`,
-      `*Breakdown:*`,
-      ...calculation.breakdown.map((b) => `• ${b.label}: €${b.price}`),
+      `*Selected Features:*`,
+      ...calculation.breakdown.map((b) => `• ${b.label}`),
       `---------------------------------`,
-      `Please confirm my order and send the next steps!`
+      `Please provide a bespoke quote and next steps!`
     ];
     return `https://wa.me/96170710406?text=${encodeURIComponent(lines.join('\n'))}`;
   };
@@ -316,8 +315,8 @@ export function OrderConfiguratorModal({
                     ? 'Build Your Custom Invitation'
                     : 'Build Your Template Invitation'}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-[#006989]/10 text-[#006989] font-sans font-bold">
-                  €{calculation.total}
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#006989]/10 text-[#006989] font-sans font-bold">
+                  Custom Quote
                 </span>
               </div>
               <div className="text-[11px] text-slate-500">
@@ -365,12 +364,12 @@ export function OrderConfiguratorModal({
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-left text-xs space-y-2">
                 <div className="font-bold text-slate-900 border-b border-slate-200 pb-2 flex justify-between">
                   <span>Configuration Summary</span>
-                  <span className="text-[#006989]">€{calculation.total}</span>
+                  <span className="text-[#006989]">Custom Quote</span>
                 </div>
                 {calculation.breakdown.map((item, idx) => (
                   <div key={idx} className="flex justify-between text-slate-600">
                     <span>{item.label}</span>
-                    <span className="font-medium">+€{item.price}</span>
+                    <span className="font-medium text-emerald-700">Selected</span>
                   </div>
                 ))}
               </div>
@@ -584,7 +583,7 @@ export function OrderConfiguratorModal({
                               )}
                             </div>
                           </div>
-                          <span className="text-xs font-bold text-slate-500">+€{addon.price}</span>
+                          <span className="text-xs font-bold text-slate-500">Optional</span>
                         </div>
                       );
                     })}
@@ -600,7 +599,7 @@ export function OrderConfiguratorModal({
                       Choose your invitation sections
                     </h4>
                     <p className="text-slate-600 text-xs sm:text-sm mt-1">
-                      Date & Location, Welcome Message, and RSVP Tracking are always included free. Choose any 2 additional sections for free (+€15 each after).
+                      Date & Location, Welcome Message, and RSVP Tracking are always included. Select any additional sections you'd like in your invitation.
                     </p>
                   </div>
 
@@ -609,7 +608,7 @@ export function OrderConfiguratorModal({
                     {FREE_INCLUDED_SECTIONS.map((sec, i) => (
                       <span key={i} className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
                         <Check className="w-3.5 h-3.5" />
-                        {sec} (Always Free)
+                        {sec} (Always Included)
                       </span>
                     ))}
                   </div>
@@ -639,10 +638,8 @@ export function OrderConfiguratorModal({
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="font-bold text-xs sm:text-sm text-slate-800">{sec.name}</span>
                             {isSelected && (
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                isFree ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'
-                              }`}>
-                                {isFree ? 'Free' : '+€15'}
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#006989]/10 text-[#006989]">
+                                Selected
                               </span>
                             )}
                           </div>
@@ -659,7 +656,7 @@ export function OrderConfiguratorModal({
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h5 className="font-bold text-sm text-slate-800">Need a custom section?</h5>
-                        <p className="text-xs text-slate-500">+€15 each</p>
+                        <p className="text-xs text-slate-500">Custom tailored to your celebration</p>
                       </div>
                       <button
                         onClick={() => setTplDetails({ ...tplDetails, customSections: [...tplDetails.customSections, ''] })}
@@ -730,7 +727,7 @@ export function OrderConfiguratorModal({
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Additional Languages (+€15 each)
+                      Additional Languages (Optional)
                     </label>
                     <select
                       onChange={(e) => {
@@ -759,7 +756,7 @@ export function OrderConfiguratorModal({
                     <div className="flex flex-wrap gap-2 mt-3">
                       {(pkgType === 'std' ? stdDetails.extraLangs : tplDetails.extraLangs).map((lang) => (
                         <span key={lang} className="px-3 py-1 rounded-full bg-[#006989]/10 text-[#006989] text-xs font-bold flex items-center gap-1.5">
-                          {lang} (+€15)
+                          {lang}
                           <button
                             onClick={() => {
                               if (pkgType === 'std') {
@@ -821,8 +818,7 @@ export function OrderConfiguratorModal({
                             <div className="flex justify-between items-start mb-1">
                               <span className="font-bold text-sm text-[#08004b]">{b.name}</span>
                               <div className="flex items-baseline gap-1.5">
-                                <span className="font-bold text-sm text-[#cebb78]">€{b.price}</span>
-                                <span className="text-xs text-slate-400 line-through">€{b.originalPrice}</span>
+                                <span className="font-bold text-xs uppercase px-2 py-0.5 rounded-full bg-amber-100 text-[#08004b]">Curated</span>
                               </div>
                             </div>
                             <p className="text-xs text-slate-600">{b.desc}</p>
@@ -857,7 +853,7 @@ export function OrderConfiguratorModal({
                           >
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-bold text-xs sm:text-sm text-slate-800">{extra.name}</span>
-                              <span className="text-xs font-bold text-slate-600">+€{extra.price}</span>
+                              <span className="text-xs font-bold text-slate-500">Optional</span>
                             </div>
                             <p className="text-[11px] text-slate-500">{extra.desc}</p>
                           </div>
@@ -885,7 +881,7 @@ export function OrderConfiguratorModal({
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="font-bold text-sm text-slate-800 block">Personalised Guest Links</span>
-                        <span className="text-xs text-slate-500">€3 per guest link</span>
+                        <span className="text-xs text-slate-500">Bespoke URL for each guest</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <button
@@ -909,7 +905,7 @@ export function OrderConfiguratorModal({
                   <div>
                     <span className="font-bold text-sm text-slate-800 block mb-1">Different Event Versions</span>
                     <span className="text-xs text-slate-500 block mb-3">
-                      e.g. Ceremony + Dinner guests vs Evening Party guests (+€15 per extra version)
+                      e.g. Ceremony + Dinner guests vs Evening Party guests
                     </span>
                     <div className="flex gap-2">
                       {[0, 1, 2, 3].map((v) => (
@@ -922,7 +918,7 @@ export function OrderConfiguratorModal({
                               : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
                           }`}
                         >
-                          {v === 0 ? 'Just 1' : `+${v} (€${v * 15})`}
+                          {v === 0 ? 'Single Version' : `+${v} extra`}
                         </button>
                       ))}
                     </div>
@@ -1004,12 +1000,12 @@ export function OrderConfiguratorModal({
                     {calculation.breakdown.map((item, idx) => (
                       <div key={idx} className="flex justify-between text-slate-600">
                         <span>{item.label}</span>
-                        <span className="font-medium">+€{item.price}</span>
+                        <span className="font-medium text-emerald-700">Included</span>
                       </div>
                     ))}
                     <div className="border-t border-slate-200 pt-2 flex justify-between font-serif text-base font-bold text-[#08004b]">
-                      <span>Total</span>
-                      <span>€{calculation.total}</span>
+                      <span>Package Pricing</span>
+                      <span>Custom Quote</span>
                     </div>
                   </div>
                 </div>
@@ -1023,9 +1019,9 @@ export function OrderConfiguratorModal({
         {!orderSubmitted && (
           <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[11px] uppercase font-bold text-slate-400">Total Price</span>
+              <span className="text-[11px] uppercase font-bold text-slate-400">Pricing Tier</span>
               <span className="font-serif text-2xl font-bold text-[#08004b]">
-                €{calculation.total}
+                Custom Quote
               </span>
             </div>
 

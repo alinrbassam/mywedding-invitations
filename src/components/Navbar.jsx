@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, MessageCircle } from 'lucide-react';
-import { InstagramIcon } from './Icons';
 
 export function Navbar({ onOpenOrder }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,15 +37,22 @@ export function Navbar({ onOpenOrder }) {
           
           {/* Brand / Logo */}
           <a href="#" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-[#08004b] flex items-center justify-center text-white font-serif text-xl tracking-wider shadow-sm group-hover:scale-105 transition-transform">
-              W
-            </div>
+            <img
+              src="/laylitna-logo.png"
+              alt="Laylitna"
+              className="w-10 h-10 rounded-full object-cover shadow-xs border border-[#be9667]/30 group-hover:scale-105 transition-transform"
+            />
             <div className="flex flex-col">
-              <span className="font-serif text-xl font-bold tracking-wide text-[#08004b] leading-tight">
-                Webgency
-              </span>
-              <span className="text-[10px] tracking-[0.2em] uppercase font-semibold text-[#006989]">
-                Invitations
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-serif text-xl font-bold tracking-wide text-[#08004b] leading-tight">
+                  Laylitna
+                </span>
+                <span className="text-xs font-serif text-[#006989] font-medium" dir="rtl">
+                  ليلتنا
+                </span>
+              </div>
+              <span className="text-[9px] tracking-[0.16em] uppercase font-semibold text-[#006989]">
+                Digital Invitations
               </span>
             </div>
           </a>
@@ -72,15 +78,6 @@ export function Navbar({ onOpenOrder }) {
           {/* Right Action & Socials */}
           <div className="hidden sm:flex items-center gap-3">
             <a
-              href="https://www.instagram.com/webgency_invitations/"
-              target="_blank"
-              rel="noreferrer"
-              className="p-2 text-[#4a4a4a] hover:text-[#006989] transition-colors rounded-full hover:bg-black/5"
-              title="Instagram"
-            >
-              <InstagramIcon className="w-5 h-5" />
-            </a>
-            <a
               href="https://wa.me/96170710406?text=Hello!%20I%20have%20a%20question%20about%20your%20digital%20invitations"
               target="_blank"
               rel="noreferrer"
@@ -93,7 +90,7 @@ export function Navbar({ onOpenOrder }) {
               href="https://wa.me/96170710406?text=Hello!%20I%20would%20like%20to%20inquire%20about%20a%20wedding%20invitation"
               target="_blank"
               rel="noreferrer"
-              className="ml-2 px-4 py-2 bg-[#006989] text-white text-xs uppercase tracking-wider font-bold rounded-full hover:bg-[#005570] transition-all shadow-sm hover:shadow-md"
+              className="ml-1 px-4 py-2 bg-[#006989] text-white text-xs uppercase tracking-wider font-bold rounded-full hover:bg-[#005570] transition-all shadow-sm hover:shadow-md"
             >
               Inquire Now
             </a>
@@ -135,22 +132,15 @@ export function Navbar({ onOpenOrder }) {
             </a>
           ))}
           <div className="pt-3 border-t border-slate-300 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <a
-                href="https://www.instagram.com/webgency_invitations/"
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 text-[#4a4a4a] hover:text-[#006989]"
-              >
-                <InstagramIcon className="w-5 h-5" />
-              </a>
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#006989]">
               <a
                 href="https://wa.me/96170710406"
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 text-[#4a4a4a] hover:text-[#25D366]"
+                className="p-2 text-[#25D366] hover:bg-black/5 rounded-full flex items-center gap-1.5"
               >
                 <MessageCircle className="w-5 h-5" />
+                <span className="text-[#4a4a4a] text-xs">+961 70 710 406</span>
               </a>
             </div>
             <a

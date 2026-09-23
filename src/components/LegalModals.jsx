@@ -26,7 +26,7 @@ export function LegalModals({ type, onClose }) {
         {isPrivacy ? (
           <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <p>
-              At Webgency Invitations, we respect your privacy. This Privacy Policy describes how we handle and protect personal data collected when designing and hosting digital wedding and event invitations.
+              At Laylitna Invitations, we respect your privacy. This Privacy Policy describes how we handle and protect personal data collected when designing and hosting digital wedding and event invitations.
             </p>
             <h4 className="font-bold text-slate-900 text-sm">1. Information We Collect</h4>
             <p>
@@ -44,7 +44,7 @@ export function LegalModals({ type, onClose }) {
         ) : (
           <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <p>
-              By ordering a digital invitation from Webgency Invitations, you agree to the following terms and service conditions.
+              By ordering a digital invitation from Laylitna Invitations, you agree to the following terms and service conditions.
             </p>
             <h4 className="font-bold text-slate-900 text-sm">1. Design & Unlimited Revisions</h4>
             <p>

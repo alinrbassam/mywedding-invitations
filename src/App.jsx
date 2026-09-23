@@ -17,9 +17,11 @@ import { TemplatePreviewModal } from './components/TemplatePreviewModal';
 import { LegalModals } from './components/LegalModals';
 import { InvitationTemplateView } from './components/InvitationTemplateView';
 import { CoupleGuestDashboard } from './components/CoupleGuestDashboard';
+import { AdminLoginModal } from './components/AdminLoginModal';
 
 import { TEMPLATE_PAGES } from './data/templates';
 import { getClientInvite, unpackInviteData } from './data/clientInvites';
+import { isSessionAdmin } from './config/adminAuth';
 
 export function App() {
   const [orderModal, setOrderModal] = useState({
@@ -35,6 +37,7 @@ export function App() {
   const [viewingCustomData, setViewingCustomData] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
   const [guestDashboardSlug, setGuestDashboardSlug] = useState(null);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
 
   // Check URL pathname and hash on load and listen for changes
   useEffect(() => {
@@ -83,6 +86,20 @@ export function App() {
           setClientProfile({ clientName: unpacked.data?.partner1 ? `${unpacked.data.partner1} & ${unpacked.data.partner2}` : 'Client Preview', slug: 'preview' });
           return;
         }
+      }
+
+      // Direct Admin access: /admin or #admin
+      if (path === 'admin' || hash === 'admin') {
+        if (isSessionAdmin()) {
+          const defaultTemplate = urlParams.get('template') || 'blossom-oud';
+          setViewingTemplateId(defaultTemplate);
+          setViewingCustomData(null);
+          setClientProfile(null);
+          setIsAdminLoginOpen(false);
+        } else {
+          setIsAdminLoginOpen(true);
+        }
+        return;
       }
 
       if (path) {
@@ -153,13 +170,16 @@ export function App() {
     };
   }, []);
 
-  const handleOpenOrder = (pkg = 'template', designId = null, customData = null) => {
-    setOrderModal({
-      isOpen: true,
-      pkg,
-      designId,
-      customData,
-    });
+  const handleOpenOrder = (pkg = 'template', designId = null) => {
+    let msg = 'Hello! I would like to inquire about your luxury digital wedding invitations.';
+    if (designId) {
+      msg = `Hello! I would like to inquire about the ${designId} invitation design.`;
+    } else if (pkg === 'std') {
+      msg = 'Hello! I would like to inquire about your interactive Save the Date invitations.';
+    } else if (pkg === 'custom') {
+      msg = 'Hello! I would like to inquire about a custom bespoke wedding invitation.';
+    }
+    window.open(`https://wa.me/96170710406?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const handleCloseOrder = () => {
@@ -183,6 +203,14 @@ export function App() {
   const handleBackFromTemplate = () => {
     setViewingTemplateId(null);
     window.history.pushState(null, '', '/');
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setIsAdminLoginOpen(false);
+    setViewingTemplateId('blossom-oud');
+    setViewingCustomData(null);
+    setClientProfile(null);
+    window.history.pushState(null, '', '/template/blossom-oud');
   };
 
   // If Couple's Guest Dashboard is active, render it
@@ -269,6 +297,7 @@ export function App() {
       <Footer
         onScrollToSection={handleScrollToSection}
         onOpenLegal={(type) => setLegalType(type)}
+        onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
       />
 
       {/* Floating WhatsApp Action Pill */}
@@ -303,6 +332,13 @@ export function App() {
           onClose={() => setLegalType(null)}
         />
       )}
+
+      {/* Admin Sign In Modal */}
+      <AdminLoginModal
+        isOpen={isAdminLoginOpen}
+        onClose={() => setIsAdminLoginOpen(false)}
+        onSuccess={handleAdminLoginSuccess}
+      />
     </div>
   );
 }
