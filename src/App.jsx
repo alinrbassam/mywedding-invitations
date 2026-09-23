@@ -18,6 +18,7 @@ import { LegalModals } from './components/LegalModals';
 import { InvitationTemplateView } from './components/InvitationTemplateView';
 import { CoupleGuestDashboard } from './components/CoupleGuestDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
+import { AdminWeddingManagerModal } from './components/AdminWeddingManagerModal';
 
 import { TEMPLATE_PAGES } from './data/templates';
 import { getClientInvite, unpackInviteData } from './data/clientInvites';
@@ -38,6 +39,7 @@ export function App() {
   const [clientProfile, setClientProfile] = useState(null);
   const [guestDashboardSlug, setGuestDashboardSlug] = useState(null);
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isWeddingManagerOpen, setIsWeddingManagerOpen] = useState(false);
 
   // Check URL pathname and hash on load and listen for changes
   useEffect(() => {
@@ -91,10 +93,7 @@ export function App() {
       // Direct Admin access: /admin or #admin
       if (path === 'admin' || hash === 'admin') {
         if (isSessionAdmin()) {
-          const defaultTemplate = urlParams.get('template') || 'blossom-oud';
-          setViewingTemplateId(defaultTemplate);
-          setViewingCustomData(null);
-          setClientProfile(null);
+          setIsWeddingManagerOpen(true);
           setIsAdminLoginOpen(false);
         } else {
           setIsAdminLoginOpen(true);
@@ -207,10 +206,31 @@ export function App() {
 
   const handleAdminLoginSuccess = () => {
     setIsAdminLoginOpen(false);
-    setViewingTemplateId('blossom-oud');
-    setViewingCustomData(null);
-    setClientProfile(null);
-    window.history.pushState(null, '', '/template/blossom-oud');
+    setIsWeddingManagerOpen(true);
+  };
+
+  const handleOpenAdmin = () => {
+    if (isSessionAdmin()) {
+      setIsWeddingManagerOpen(true);
+    } else {
+      setIsAdminLoginOpen(true);
+    }
+  };
+
+  const handleOpenStudioForWedding = (wedding) => {
+    setIsWeddingManagerOpen(false);
+    setViewingTemplateId(wedding.templateId || 'dolce-vita');
+    setViewingCustomData(wedding.customData || null);
+    setClientProfile(wedding);
+    window.history.pushState(null, '', `/${wedding.slug}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenDashboardForWedding = (slug) => {
+    setIsWeddingManagerOpen(false);
+    setViewingTemplateId(null);
+    setGuestDashboardSlug(slug);
+    window.history.pushState(null, '', `/invite/${slug}/guests`);
   };
 
   // If Couple's Guest Dashboard is active, render it
@@ -237,21 +257,31 @@ export function App() {
   // If a template is actively being viewed, render the self-hosted invitation page!
   if (viewingTemplateId) {
     return (
-      <InvitationTemplateView
-        templateId={viewingTemplateId}
-        onBack={handleBackFromTemplate}
-        initialCustomData={viewingCustomData}
-        clientProfile={clientProfile}
-        onOpenDashboard={(slug) => {
-          setViewingTemplateId(null);
-          setGuestDashboardSlug(slug);
-          window.history.pushState(null, '', `/invite/${slug}/guests`);
-        }}
-        onOrder={(designId, customData) => {
-          handleBackFromTemplate();
-          handleOpenOrder('template', designId, customData);
-        }}
-      />
+      <>
+        <InvitationTemplateView
+          templateId={viewingTemplateId}
+          onBack={handleBackFromTemplate}
+          initialCustomData={viewingCustomData}
+          clientProfile={clientProfile}
+          onOpenWeddingManager={() => setIsWeddingManagerOpen(true)}
+          onOpenDashboard={(slug) => {
+            setViewingTemplateId(null);
+            setGuestDashboardSlug(slug);
+            window.history.pushState(null, '', `/invite/${slug}/guests`);
+          }}
+          onOrder={(designId, customData) => {
+            handleBackFromTemplate();
+            handleOpenOrder('template', designId, customData);
+          }}
+        />
+
+        <AdminWeddingManagerModal
+          isOpen={isWeddingManagerOpen}
+          onClose={() => setIsWeddingManagerOpen(false)}
+          onOpenStudioForWedding={handleOpenStudioForWedding}
+          onOpenDashboardForWedding={handleOpenDashboardForWedding}
+        />
+      </>
     );
   }
 
@@ -297,7 +327,7 @@ export function App() {
       <Footer
         onScrollToSection={handleScrollToSection}
         onOpenLegal={(type) => setLegalType(type)}
-        onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
+        onOpenAdminLogin={handleOpenAdmin}
       />
 
       {/* Floating WhatsApp Action Pill */}
@@ -338,6 +368,14 @@ export function App() {
         isOpen={isAdminLoginOpen}
         onClose={() => setIsAdminLoginOpen(false)}
         onSuccess={handleAdminLoginSuccess}
+      />
+
+      {/* Admin Wedding Projects Manager Modal */}
+      <AdminWeddingManagerModal
+        isOpen={isWeddingManagerOpen}
+        onClose={() => setIsWeddingManagerOpen(false)}
+        onOpenStudioForWedding={handleOpenStudioForWedding}
+        onOpenDashboardForWedding={handleOpenDashboardForWedding}
       />
     </div>
   );

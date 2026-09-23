@@ -5,7 +5,8 @@ import {
   Search, RefreshCw, Calendar, MapPin, Sparkles, Heart,
   ChevronRight, ArrowLeft, ShieldCheck, Share2
 } from 'lucide-react';
-import { getClientInvite, getClientRsvps, saveClientRsvp, deleteClientRsvp, getClientRsvpStats } from '../data/clientInvites';
+import { getClientInvite, getClientRsvps, saveClientRsvp, deleteClientRsvp, getClientRsvpStats, verifyCoupleAccess } from '../data/clientInvites';
+import { isSessionAdmin } from '../config/adminAuth';
 
 export function CoupleGuestDashboard({ clientSlug = 'hadi', onBackToHome, onOpenInvite }) {
   const [slug] = useState((clientSlug || 'hadi').toLowerCase().replace(/[^a-z0-9_-]/g, ''));
@@ -15,6 +16,32 @@ export function CoupleGuestDashboard({ clientSlug = 'hadi', onBackToHome, onOpen
   const [filterTab, setFilterTab] = useState('all'); // 'all' | 'attending' | 'declined' | 'dietary'
   const [copiedToast, setCopiedToast] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Option C: Secure PIN / Key Gate
+  const [isUnlocked, setIsUnlocked] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    // 1. Admin session is automatically authorized
+    if (isSessionAdmin()) return true;
+
+    // 2. Previously authorized in session
+    if (sessionStorage.getItem(`laylitna_couple_auth_${slug}`) === 'true') return true;
+
+    // 3. Secret Key or PIN in query parameters (?key=... or ?pin=...)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const key = params.get('key') || params.get('pin');
+      if (key && verifyCoupleAccess(slug, key)) {
+        sessionStorage.setItem(`laylitna_couple_auth_${slug}`, 'true');
+        return true;
+      }
+    } catch (e) {}
+
+    return false;
+  });
+
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+
   const [newGuest, setNewGuest] = useState({
     name: '',
     attending: 'yes',
@@ -252,7 +279,85 @@ export function CoupleGuestDashboard({ clientSlug = 'hadi', onBackToHome, onOpen
   };
 
   const inviteUrl = `${window.location.origin}/invite/${slug}`;
-  const dashboardUrl = `${window.location.origin}/invite/${slug}/guests`;
+  const dashboardUrl = `${window.location.origin}/invite/${slug}/guests${client?.secretPin ? `?key=${client.secretPin}` : ''}`;
+
+  const handlePinSubmit = (e) => {
+    e.preventDefault();
+    if (verifyCoupleAccess(slug, pinInput)) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(`laylitna_couple_auth_${slug}`, 'true');
+      }
+      setIsUnlocked(true);
+      setPinError('');
+    } else {
+      setPinError('Incorrect 4-digit PIN. Please try again or use your secret WhatsApp link.');
+    }
+  };
+
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen bg-[#070b19] text-slate-100 flex flex-col items-center justify-center p-4 font-sans selection:bg-[#cebb78]/30 selection:text-[#cebb78]">
+        <div className="w-full max-w-md bg-[#08004b]/95 border border-[#cebb78]/40 rounded-3xl p-7 sm:p-9 shadow-2xl backdrop-blur-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-full mx-auto border-2 border-[#cebb78] overflow-hidden shadow-lg p-1 bg-white/5">
+            <img src="/laylitna-logo.png" alt="Laylitna" className="w-full h-full object-cover rounded-full" />
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-[#cebb78]/15 text-[#cebb78] border border-[#cebb78]/30 inline-block">
+              Private Couple Access
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
+              {coupleNames}
+            </h2>
+            <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed pt-1">
+              Please enter your 4-digit Wedding PIN to view your private guest RSVP responses and headcount.
+            </p>
+          </div>
+
+          <form onSubmit={handlePinSubmit} className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={8}
+                autoFocus
+                value={pinInput}
+                onChange={(e) => {
+                  setPinInput(e.target.value);
+                  if (pinError) setPinError('');
+                }}
+                placeholder="Enter 4-digit PIN..."
+                className="w-full text-center tracking-[0.3em] font-mono text-xl py-3 px-4 rounded-xl bg-white/10 border border-slate-600 focus:border-[#cebb78] text-white placeholder-slate-500 focus:outline-none transition-all"
+              />
+              {pinError && (
+                <p className="text-xs text-rose-400 font-medium animate-in fade-in">
+                  {pinError}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 px-6 rounded-xl bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] font-bold text-sm tracking-wider uppercase transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Unlock Dashboard</span>
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
+            <button
+              onClick={() => onOpenInvite ? onOpenInvite(slug) : window.location.href = `/invite/${slug}`}
+              className="hover:text-white transition-colors"
+            >
+              ← View Invitation Card
+            </button>
+            <span className="text-[#cebb78]/70">Laylitna Security</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#070b19] text-slate-100 flex flex-col font-sans selection:bg-[#cebb78]/30 selection:text-[#cebb78]">

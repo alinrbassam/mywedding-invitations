@@ -523,7 +523,8 @@ export function InvitationTemplateView({
   onOrder,
   initialCustomData = null,
   clientProfile = null,
-  onOpenDashboard = null
+  onOpenDashboard = null,
+  onOpenWeddingManager = null
 }) {
   const info = TEMPLATE_INFO[templateId] || TEMPLATE_INFO['blossom-oud'];
   const [isAdmin, setIsAdmin] = useState(() => {
@@ -2142,6 +2143,17 @@ export function InvitationTemplateView({
                 <span className="hidden sm:inline">Exit Studio</span>
               </button>
 
+              {/* All Weddings Manager Button */}
+              {onOpenWeddingManager && (
+                <button
+                  onClick={onOpenWeddingManager}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#cebb78] hover:bg-[#dece88] text-[#08004b] text-xs font-bold transition-all shadow-md hover:scale-105"
+                  title="Open Wedding Projects Manager"
+                >
+                  <span>💍 All Weddings</span>
+                </button>
+              )}
+
               {/* Guest RSVPs Dashboard Button */}
               <button
                 onClick={() => {
@@ -2149,7 +2161,8 @@ export function InvitationTemplateView({
                   if (onOpenDashboard) {
                     onOpenDashboard(slug);
                   } else {
-                    window.open(`/invite/${slug}/guests`, '_blank');
+                    const pin = clientProfile?.secretPin || '1234';
+                    window.open(`/invite/${slug}/guests?key=${pin}`, '_blank');
                   }
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md hover:scale-105"
@@ -2162,8 +2175,9 @@ export function InvitationTemplateView({
               <button
                 onClick={() => {
                   let slug = clientProfile?.slug || 'hadi';
-                  const url = `${window.location.origin}/invite/${slug}`;
-                  const dashUrl = `${window.location.origin}/invite/${slug}/guests`;
+                  const pin = clientProfile?.secretPin || '1234';
+                  const url = `${window.location.origin}/${slug}`;
+                  const dashUrl = `${window.location.origin}/invite/${slug}/guests?key=${pin}`;
                   if (navigator.clipboard) {
                     navigator.clipboard.writeText(url);
                   }

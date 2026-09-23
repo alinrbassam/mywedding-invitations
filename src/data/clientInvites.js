@@ -10,6 +10,7 @@ export const CLIENT_INVITES = {
     slug: 'hadi',
     clientName: 'Hadi',
     templateId: 'dolce-vita',
+    secretPin: '1234',
     createdAt: '2026-09-18',
     status: 'active',
     customData: {
@@ -120,13 +121,141 @@ export const SEED_RSVPS = {
   ]
 };
 
+export const WEDDINGS_REGISTRY_KEY = 'laylitna_weddings_registry';
+const memoryRegistry = {};
+
+/**
+ * Get all registered client weddings (seeded + custom saved in localStorage)
+ */
+export function getAllClientWeddings() {
+  const dynamicMap = { ...memoryRegistry };
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(WEDDINGS_REGISTRY_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          Object.assign(dynamicMap, parsed);
+        }
+      }
+    } catch (e) {
+      console.error('Error reading weddings registry:', e);
+    }
+  }
+
+  // Merge static seeds with dynamic map
+  const merged = { ...CLIENT_INVITES, ...dynamicMap };
+  return Object.values(merged);
+}
+
 /**
  * Look up a client invite by slug (case-insensitive)
  */
 export function getClientInvite(slug) {
   if (!slug) return null;
   const clean = slug.toLowerCase().replace(/[^a-z0-9_-]/g, '');
-  return CLIENT_INVITES[clean] || null;
+
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(WEDDINGS_REGISTRY_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed[clean]) {
+          return parsed[clean];
+        }
+      }
+    } catch (e) {}
+  }
+
+  return memoryRegistry[clean] || CLIENT_INVITES[clean] || null;
+}
+
+/**
+ * Create or save a new client wedding project
+ */
+export function saveClientWedding(wedding) {
+  if (!wedding || !wedding.slug) return null;
+  const cleanSlug = wedding.slug.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  
+  const partner1 = wedding.partner1 || wedding.customData?.partner1 || 'Bride';
+  const partner2 = wedding.partner2 || wedding.customData?.partner2 || 'Groom';
+
+  const record = {
+    slug: cleanSlug,
+    clientName: wedding.clientName || `${partner1} & ${partner2}`,
+    templateId: wedding.templateId || 'dolce-vita',
+    secretPin: String(wedding.secretPin || Math.floor(1000 + Math.random() * 9000)),
+    createdAt: wedding.createdAt || new Date().toISOString().split('T')[0],
+    status: wedding.status || 'active',
+    customData: wedding.customData || {
+      partner1,
+      partner2,
+      connector: '&',
+      initials: `${partner1[0] || 'A'}${partner2[0] || 'N'}`,
+      dateText: wedding.dateText || 'September 20, 2026',
+      dateInput: wedding.dateInput || '2026-09-20',
+      timeInput: wedding.timeInput || '18:00',
+      venueName: wedding.venueName || 'Grand Ballroom',
+      venueAddress: wedding.venueAddress || '',
+      mapUrl: wedding.mapUrl || '',
+      welcomeMessage: wedding.welcomeMessage || 'We joyfully invite you to celebrate our special day with us.',
+      dressCode: wedding.dressCode || 'Black Tie / Evening Glamour',
+      giftPreference: 'Your presence at our wedding is the greatest gift.',
+      rsvpDeadline: wedding.rsvpDeadline || '',
+      rsvpDeadlineMessage: 'Please confirm your attendance with us.'
+    }
+  };
+
+  memoryRegistry[cleanSlug] = record;
+
+  if (typeof window !== 'undefined') {
+    try {
+      let currentMap = {};
+      const stored = localStorage.getItem(WEDDINGS_REGISTRY_KEY);
+      if (stored) currentMap = JSON.parse(stored) || {};
+      currentMap[cleanSlug] = record;
+      localStorage.setItem(WEDDINGS_REGISTRY_KEY, JSON.stringify(currentMap));
+      window.dispatchEvent(new CustomEvent('laylitna_weddings_updated', { detail: record }));
+    } catch (e) {
+      console.error('Failed to save wedding to registry:', e);
+    }
+  }
+
+  return record;
+}
+
+/**
+ * Delete a client wedding project from dynamic registry
+ */
+export function deleteClientWedding(slug) {
+  if (!slug) return false;
+  const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  delete memoryRegistry[cleanSlug];
+  if (typeof window !== 'undefined') {
+    try {
+      let currentMap = {};
+      const stored = localStorage.getItem(WEDDINGS_REGISTRY_KEY);
+      if (stored) currentMap = JSON.parse(stored) || {};
+      delete currentMap[cleanSlug];
+      localStorage.setItem(WEDDINGS_REGISTRY_KEY, JSON.stringify(currentMap));
+      window.dispatchEvent(new CustomEvent('laylitna_weddings_updated', { detail: { deleted: cleanSlug } }));
+      return true;
+    } catch (e) {
+      console.error('Failed to delete wedding:', e);
+    }
+  }
+  return false;
+}
+
+/**
+ * Verify couple PIN or key
+ */
+export function verifyCoupleAccess(slug, pinOrKey) {
+  if (!slug || !pinOrKey) return false;
+  const client = getClientInvite(slug);
+  if (!client) return false;
+  const expected = String(client.secretPin || '1234').trim();
+  return String(pinOrKey).trim() === expected;
 }
 
 /**
